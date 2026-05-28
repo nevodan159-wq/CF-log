@@ -4,22 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>CF Log · Nevo</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #000;
-      --s1: #1c1c1e;
-      --s2: #2c2c2e;
-      --s3: #3a3a3c;
-      --accent: #ffd60a;
-      --green: #30d158;
-      --red: #ff453a;
-      --text: #fff;
-      --t2: rgba(235,235,245,0.6);
-      --t3: rgba(235,235,245,0.3);
+      --bg: #ffffff;
+      --s1: #f2f2f7;
+      --s2: #e5e5ea;
+      --s3: #d1d1d6;
+      --accent: #E8292A;
+      --green: #34c759;
+      --red: #E8292A;
+      --text: #111111;
+      --t2: rgba(0,0,0,0.5);
+      --t3: rgba(0,0,0,0.25);
       --tab-h: 60px;
     }
 
@@ -37,7 +37,7 @@
     .header {
       position: sticky; top: 0; z-index: 100;
       height: 52px;
-      background: rgba(0,0,0,0.88);
+      background: rgba(255,255,255,0.92);
       backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       border-bottom: 0.5px solid var(--s3);
       display: flex; align-items: center;
@@ -57,7 +57,7 @@
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
       height: calc(var(--tab-h) + env(safe-area-inset-bottom, 0px));
       padding-bottom: env(safe-area-inset-bottom, 0px);
-      background: rgba(0,0,0,0.9);
+      background: rgba(255,255,255,0.95);
       backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       border-top: 0.5px solid var(--s3);
       display: flex;
@@ -106,8 +106,8 @@
 
     .pr-card {
       margin: 16px 16px 0;
-      background: rgba(255,214,10,0.08);
-      border: 1px solid rgba(255,214,10,0.25);
+      background: rgba(232,41,42,0.06);
+      border: 1px solid rgba(232,41,42,0.25);
       border-radius: 14px; padding: 18px; text-align: center;
     }
     .pr-label {
@@ -148,7 +148,7 @@
     }
     textarea { height: 54px; resize: none; }
     .save-btn {
-      width: 100%; background: var(--accent); color: #000;
+      width: 100%; background: var(--accent); color: #fff;
       font-weight: 700; font-size: 15px; padding: 12px;
       border: none; border-radius: 10px; cursor: pointer;
       margin-top: 4px; -webkit-tap-highlight-color: transparent;
@@ -201,7 +201,7 @@
     }
     .overlay.show { display: flex; }
     .modal {
-      background: var(--s1); border-radius: 20px 20px 0 0;
+      background: var(--bg); border-radius: 20px 20px 0 0;
       width: 100%; padding: 20px 16px;
       padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
       max-height: 92vh; overflow-y: auto;
@@ -216,7 +216,7 @@
     }
 
     /* ── BADGES ── */
-    .rx { background: var(--green); color: #000; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+    .rx { background: var(--green); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
     .sc { background: var(--s2); color: var(--t2); font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
   </style>
 </head>

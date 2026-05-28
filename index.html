@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <title>CF Log · Nevo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #000;
+      --s1: #1c1c1e;
+      --s2: #2c2c2e;
+      --s3: #3a3a3c;
+      --accent: #ffd60a;
+      --green: #30d158;
+      --red: #ff453a;
+      --text: #fff;
+      --t2: rgba(235,235,245,0.6);
+      --t3: rgba(235,235,245,0.3);
+      --tab-h: 60px;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      padding-bottom: calc(var(--tab-h) + env(safe-area-inset-bottom, 0px));
+      -webkit-text-size-adjust: 100%;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      position: sticky; top: 0; z-index: 100;
+      height: 52px;
+      background: rgba(0,0,0,0.88);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 0.5px solid var(--s3);
+      display: flex; align-items: center;
+      padding: 0 16px; gap: 10px;
+    }
+    #backBtn {
+      display: none; align-items: center; gap: 2px;
+      color: var(--accent); font-size: 15px;
+      background: none; border: none; cursor: pointer;
+      padding: 4px 0; white-space: nowrap;
+    }
+    #backBtn.show { display: flex; }
+    #headerTitle { flex: 1; font-size: 17px; font-weight: 600; }
+
+    /* ── TAB BAR ── */
+    .tabbar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      height: calc(var(--tab-h) + env(safe-area-inset-bottom, 0px));
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      background: rgba(0,0,0,0.9);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-top: 0.5px solid var(--s3);
+      display: flex;
+    }
+    .tab {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 2px;
+      cursor: pointer; color: var(--t2);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tab.active { color: var(--accent); }
+    .tab-icon { font-size: 22px; line-height: 1; }
+    .tab-label { font-size: 10px; font-weight: 500; }
+
+    /* ── PAGES ── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── LIST ── */
+    .group { padding: 24px 16px 0; }
+    .group-title {
+      font-size: 12px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--t2); margin-bottom: 8px;
+    }
+    .list-block { background: var(--s1); border-radius: 12px; overflow: hidden; }
+    .list-row {
+      display: flex; align-items: center;
+      padding: 13px 16px;
+      border-bottom: 0.5px solid var(--s2);
+      cursor: pointer; gap: 10px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .list-row:last-child { border-bottom: none; }
+    .list-row:active { background: var(--s2); }
+    .row-left { flex: 1; min-width: 0; }
+    .row-name { font-size: 15px; }
+    .row-sub { font-size: 12px; color: var(--t2); margin-top: 2px; line-height: 1.3; }
+    .row-pr { font-size: 14px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+    .row-pr.none { font-size: 12px; font-weight: 400; color: var(--t3); }
+    .chevron { color: var(--t3); font-size: 11px; flex-shrink: 0; }
+
+    /* ── DETAIL ── */
+    #detail { display: none; }
+    #detail.show { display: block; padding-bottom: 40px; }
+
+    .pr-card {
+      margin: 16px 16px 0;
+      background: rgba(255,214,10,0.08);
+      border: 1px solid rgba(255,214,10,0.25);
+      border-radius: 14px; padding: 18px; text-align: center;
+    }
+    .pr-label {
+      font-size: 11px; text-transform: uppercase;
+      letter-spacing: 1.5px; color: var(--accent); margin-bottom: 4px;
+    }
+    .pr-val { font-size: 44px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
+    .pr-date { font-size: 12px; color: var(--t2); margin-top: 6px; }
+
+    .no-pr-card {
+      margin: 16px 16px 0;
+      background: var(--s1); border-radius: 14px;
+      padding: 28px; text-align: center; color: var(--t2); font-size: 14px;
+    }
+
+    /* ── FORM ── */
+    .form-card { margin: 14px 16px 0; background: var(--s1); border-radius: 14px; padding: 14px; }
+    .form-title {
+      font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--t2); margin-bottom: 12px;
+    }
+    .form-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .f { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .f label { font-size: 11px; color: var(--t2); text-transform: uppercase; letter-spacing: 0.4px; }
+    input, select, textarea {
+      background: var(--s2); border: 1px solid var(--s3);
+      border-radius: 8px; color: var(--text);
+      font-size: 16px; padding: 9px 11px; width: 100%;
+      outline: none; -webkit-appearance: none; appearance: none;
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238e8e93'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: 10px center;
+      padding-left: 28px;
+    }
+    textarea { height: 54px; resize: none; }
+    .save-btn {
+      width: 100%; background: var(--accent); color: #000;
+      font-weight: 700; font-size: 15px; padding: 12px;
+      border: none; border-radius: 10px; cursor: pointer;
+      margin-top: 4px; -webkit-tap-highlight-color: transparent;
+    }
+    .save-btn:active { opacity: 0.8; }
+
+    /* ── HISTORY ── */
+    .hist-header {
+      padding: 18px 20px 8px;
+      font-size: 12px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.5px; color: var(--t2);
+    }
+    .hist-block { background: var(--s1); border-radius: 12px; margin: 0 16px; overflow: hidden; }
+    .hist-row {
+      display: flex; align-items: center;
+      padding: 11px 14px; gap: 10px;
+      border-bottom: 0.5px solid var(--s2);
+    }
+    .hist-row:last-child { border-bottom: none; }
+    .hist-main { flex: 1; min-width: 0; }
+    .hist-score { font-size: 15px; font-weight: 700; }
+    .hist-note { font-size: 12px; color: var(--t2); margin-top: 2px; }
+    .hist-date { font-size: 12px; color: var(--t2); white-space: nowrap; }
+    .del { background: none; border: none; color: var(--red); font-size: 18px; cursor: pointer; padding: 0 0 0 6px; }
+
+    /* ── CUSTOM WODs ── */
+    .add-row { padding: 16px 16px 4px; }
+    .add-btn {
+      width: 100%; background: var(--s1);
+      border: 1px dashed var(--s3); border-radius: 12px;
+      color: var(--accent); font-size: 15px; font-weight: 600;
+      padding: 14px; cursor: pointer; text-align: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .add-btn:active { opacity: 0.7; }
+
+    .wod-card { background: var(--s1); border-radius: 12px; margin: 8px 16px 0; padding: 14px 16px; }
+    .wod-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px; }
+    .wod-name { font-size: 16px; font-weight: 700; }
+    .wod-date { font-size: 12px; color: var(--t2); }
+    .wod-score { font-size: 14px; font-weight: 600; color: var(--accent); margin: 4px 0; }
+    .wod-desc { font-size: 13px; color: var(--t2); line-height: 1.5; white-space: pre-wrap; }
+    .wod-footer { display: flex; justify-content: flex-end; margin-top: 10px; }
+
+    /* ── MODAL ── */
+    .overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7); z-index: 300;
+      align-items: flex-end;
+    }
+    .overlay.show { display: flex; }
+    .modal {
+      background: var(--s1); border-radius: 20px 20px 0 0;
+      width: 100%; padding: 20px 16px;
+      padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+      max-height: 92vh; overflow-y: auto;
+    }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .modal-title { font-size: 18px; font-weight: 700; }
+    .modal-close {
+      background: var(--s2); border: none; color: var(--t2);
+      border-radius: 50%; width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; cursor: pointer;
+    }
+
+    /* ── BADGES ── */
+    .rx { background: var(--green); color: #000; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+    .sc { background: var(--s2); color: var(--t2); font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <button id="backBtn" onclick="goBack()">‹ Back</button>
+  <span id="headerTitle">CF Log</span>
+</header>
+
+<!-- PAGES -->
+<div id="strengthPage" class="page active"></div>
+<div id="runningPage" class="page"></div>
+<div id="benchmarksPage" class="page"></div>
+<div id="customPage" class="page"></div>
+<div id="detail"></div>
+
+<!-- TAB BAR -->
+<nav class="tabbar">
+  <div class="tab active" data-tab="strength" onclick="switchTab('strength')">
+    <span class="tab-icon">🏋️</span><span class="tab-label">Strength</span>
+  </div>
+  <div class="tab" data-tab="running" onclick="switchTab('running')">
+    <span class="tab-icon">🏃</span><span class="tab-label">Running</span>
+  </div>
+  <div class="tab" data-tab="benchmarks" onclick="switchTab('benchmarks')">
+    <span class="tab-icon">🏆</span><span class="tab-label">Benchmarks</span>
+  </div>
+  <div class="tab" data-tab="custom" onclick="switchTab('custom')">
+    <span class="tab-icon">📝</span><span class="tab-label">Custom</span>
+  </div>
+</nav>
+
+<!-- CUSTOM WOD MODAL -->
+<div class="overlay" id="wodModal">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title" id="modalTitle">Log Custom WOD</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="form-row"><div class="f">
+      <label>Date</label>
+      <input type="date" id="wDate">
+    </div></div>
+    <div class="form-row"><div class="f">
+      <label>WOD Name</label>
+      <input type="text" id="wName" placeholder="e.g. Murph, or custom name">
+    </div></div>
+    <div class="form-row"><div class="f">
+      <label>Score / Result</label>
+      <input type="text" id="wScore" placeholder="e.g. 18:34, 12 rounds + 5 reps">
+    </div></div>
+    <div class="form-row"><div class="f">
+      <label>Description (optional)</label>
+      <textarea id="wDesc" placeholder="What was the workout?"></textarea>
+    </div></div>
+    <div class="form-row"><div class="f">
+      <label>Notes</label>
+      <textarea id="wNotes" placeholder="How did it feel? Scaling?"></textarea>
+    </div></div>
+    <button class="save-btn" onclick="saveCustomWod()">Save WOD</button>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// DATA DEFINITIONS
+// ─────────────────────────────────────────────
+
+const MOVEMENTS = [
+  // Strength
+  { id:'back_squat',        name:'Back Squat',          cat:'Strength',   unit:'kg' },
+  { id:'front_squat',       name:'Front Squat',         cat:'Strength',   unit:'kg' },
+  { id:'overhead_squat',    name:'Overhead Squat',      cat:'Strength',   unit:'kg' },
+  { id:'deadlift',          name:'Deadlift',            cat:'Strength',   unit:'kg' },
+  { id:'shoulder_press',    name:'Shoulder Press',      cat:'Strength',   unit:'kg' },
+  { id:'push_press',        name:'Push Press',          cat:'Strength',   unit:'kg' },
+  { id:'bench_press',       name:'Bench Press',         cat:'Strength',   unit:'kg' },
+  // Olympic
+  { id:'snatch',            name:'Snatch',              cat:'Olympic',    unit:'kg' },
+  { id:'power_snatch',      name:'Power Snatch',        cat:'Olympic',    unit:'kg' },
+  { id:'hang_power_snatch', name:'Hang Power Snatch',   cat:'Olympic',    unit:'kg' },
+  { id:'clean_jerk',        name:'Clean & Jerk',        cat:'Olympic',    unit:'kg' },
+  { id:'clean',             name:'Clean',               cat:'Olympic',    unit:'kg' },
+  { id:'power_clean',       name:'Power Clean',         cat:'Olympic',    unit:'kg' },
+  { id:'hang_power_clean',  name:'Hang Power Clean',    cat:'Olympic',    unit:'kg' },
+  // CrossFit Specific
+  { id:'thruster',          name:'Thruster',            cat:'CrossFit',   unit:'kg' },
+  { id:'kettlebell',        name:'KB Swing (max)',      cat:'CrossFit',   unit:'kg' },
+  // Gymnastics
+  { id:'pullup',            name:'Pull-up',             cat:'Gymnastics', unit:'reps' },
+  { id:'muscle_up',         name:'Ring Muscle-up',      cat:'Gymnastics', unit:'reps' },
+  { id:'hspu',              name:'HSPU',                cat:'Gymnastics', unit:'reps' },
+  { id:'ttb',               name:'Toes to Bar',         cat:'Gymnastics', unit:'reps' },
+  { id:'du',                name:'Double-Unders',       cat:'Gymnastics', unit:'reps' },
+];
+
+const RUNNING = [
+  { id:'r400',  name:'400m',   label:'400m Sprint'   },
+  { id:'r800',  name:'800m',   label:'800m Run'       },
+  { id:'r1600', name:'1 Mile', label:'1 Mile (1600m)' },
+  { id:'r5k',   name:'5K',     label:'5 Kilometer'   },
+  { id:'r10k',  name:'10K',    label:'10 Kilometer'  },
+];
+
+const BENCHMARKS = [
+  // The Girls
+  { id:'fran',      name:'Fran',      cat:'The Girls',  type:'time',  desc:'21-15-9 · Thrusters 43/30kg + Pull-ups' },
+  { id:'helen',     name:'Helen',     cat:'The Girls',  type:'time',  desc:'3 rounds · 400m Run, 21 KB Swings 24/16kg, 12 Pull-ups' },
+  { id:'grace',     name:'Grace',     cat:'The Girls',  type:'time',  desc:'30 Clean & Jerks for time (60/43kg)' },
+  { id:'isabel',    name:'Isabel',    cat:'The Girls',  type:'time',  desc:'30 Snatches for time (60/43kg)' },
+  { id:'diane',     name:'Diane',     cat:'The Girls',  type:'time',  desc:'21-15-9 · Deadlift 102.5/70kg + HSPU' },
+  { id:'elizabeth', name:'Elizabeth', cat:'The Girls',  type:'time',  desc:'21-15-9 · Clean 60/43kg + Ring Dips' },
+  { id:'cindy',     name:'Cindy',     cat:'The Girls',  type:'amrap', desc:'20 min AMRAP · 5 Pull-ups, 10 Push-ups, 15 Air Squats' },
+  { id:'mary',      name:'Mary',      cat:'The Girls',  type:'amrap', desc:'20 min AMRAP · 5 HSPU, 10 Pistols, 15 Pull-ups' },
+  { id:'annie',     name:'Annie',     cat:'The Girls',  type:'time',  desc:'50-40-30-20-10 · Double-Unders + Sit-ups' },
+  { id:'jackie',    name:'Jackie',    cat:'The Girls',  type:'time',  desc:'1000m Row, 50 Thrusters 20/15kg, 30 Pull-ups' },
+  { id:'karen',     name:'Karen',     cat:'The Girls',  type:'time',  desc:'150 Wall Balls (9/6kg) for time' },
+  { id:'nancy',     name:'Nancy',     cat:'The Girls',  type:'time',  desc:'5 rounds · 400m Run + 15 OHS 43/30kg' },
+  { id:'angie',     name:'Angie',     cat:'The Girls',  type:'time',  desc:'100 Pull-ups → 100 Push-ups → 100 Sit-ups → 100 Squats' },
+  { id:'barbara',   name:'Barbara',   cat:'The Girls',  type:'time',  desc:'5 rounds (3 min rest) · 20 Pull-ups, 30 Push-ups, 40 Sit-ups, 50 Squats' },
+  { id:'chelsea',   name:'Chelsea',   cat:'The Girls',  type:'emom',  desc:'30 min EMOM · 5 Pull-ups, 10 Push-ups, 15 Squats' },
+  { id:'linda',     name:'Linda',     cat:'The Girls',  type:'time',  desc:'10-9-8...1 · Deadlift 1.5BW, Bench Press BW, Clean 0.75BW' },
+  // The Heroes
+  { id:'murph',     name:'Murph',     cat:'The Heroes', type:'time',  desc:'1 mile Run, 100 Pull-ups, 200 Push-ups, 300 Squats, 1 mile Run (vest 9/6kg)' },
+  { id:'dt',        name:'DT',        cat:'The Heroes', type:'time',  desc:'5 rounds · 12 Deadlift, 9 Hang Power Clean, 6 Push Jerk (70/47.5kg)' },
+  { id:'jt',        name:'JT',        cat:'The Heroes', type:'time',  desc:'21-15-9 · HSPU, Ring Dips, Push-ups' },
+  { id:'danny',     name:'Danny',     cat:'The Heroes', type:'time',  desc:'20 rounds · 20 Pull-ups, 20 Push-ups, 20 Squats' },
+  { id:'michael',   name:'Michael',   cat:'The Heroes', type:'time',  desc:'3 rounds · 800m Run, 50 Back Extensions, 50 Sit-ups' },
+  { id:'nate',      name:'Nate',      cat:'The Heroes', type:'amrap', desc:'20 min AMRAP · 2 Ring MU, 4 HSPU, 8 KB Swings 32kg' },
+  { id:'jason',     name:'Jason',     cat:'The Heroes', type:'time',  desc:'100 Squats, 5 muscle-ups, 75 squats, 10 MU, 50 squats, 15 MU, 25 squats, 20 MU' },
+];
+
+// ─────────────────────────────────────────────
+// STORAGE
+// ─────────────────────────────────────────────
+
+function load(key) {
+  try { return JSON.parse(localStorage.getItem(key) || '{}'); } catch { return {}; }
+}
+function save(key, val) {
+  localStorage.setItem(key, JSON.stringify(val));
+}
+
+function getEntries(type, id) {
+  const data = load('cflog_' + type);
+  return (data[id] || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+}
+
+function addEntry(type, id, entry) {
+  const data = load('cflog_' + type);
+  if (!data[id]) data[id] = [];
+  entry.id = Date.now();
+  data[id].push(entry);
+  save('cflog_' + type, data);
+}
+
+function deleteEntry(type, id, entryId) {
+  const data = load('cflog_' + type);
+  data[id] = (data[id] || []).filter(e => e.id !== entryId);
+  save('cflog_' + type, data);
+}
+
+function getCustomWods() {
+  const data = load('cflog_custom');
+  return (data.wods || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+}
+
+function addCustomWod(wod) {
+  const data = load('cflog_custom');
+  if (!data.wods) data.wods = [];
+  wod.id = Date.now();
+  data.wods.push(wod);
+  save('cflog_custom', data);
+}
+
+function deleteCustomWod(wodId) {
+  const data = load('cflog_custom');
+  data.wods = (data.wods || []).filter(w => w.id !== wodId);
+  save('cflog_custom', data);
+}
+
+// ─────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────
+
+function getPR(entries, unit) {
+  if (!entries.length) return null;
+  if (unit === 'reps') {
+    const best = entries.reduce((a, b) => (b.reps > a.reps ? b : a));
+    return { val: best.reps + ' reps', date: best.date };
+  }
+  const best = entries.reduce((a, b) => (b.weight > a.weight ? b : a));
+  return { val: best.weight + ' kg', date: best.date };
+}
+
+function getRunPR(entries) {
+  if (!entries.length) return null;
+  const best = entries.reduce((a, b) => (b.secs < a.secs ? b : a));
+  return { val: secsToTime(best.secs), date: best.date };
+}
+
+function getBenchPR(entries) {
+  if (!entries.length) return null;
+  // For time: lower is better. For AMRAP: higher is better. Store raw in secs or text.
+  const latest = entries[0];
+  return { val: latest.score, date: latest.date };
+}
+
+function secsToTime(secs) {
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  const s = secs % 60;
+  if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function timeToSecs(mm, ss) {
+  return (parseInt(mm)||0)*60 + (parseInt(ss)||0);
+}
+
+function today() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function fmtDate(d) {
+  if (!d) return '';
+  const dt = new Date(d + 'T12:00:00');
+  return dt.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+}
+
+// ─────────────────────────────────────────────
+// STATE & NAVIGATION
+// ─────────────────────────────────────────────
+
+let state = { tab: 'strength', detail: null }; // detail: { type, id, name }
+
+function switchTab(tab) {
+  if (state.detail) goBack();
+  state.tab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === tab + 'Page'));
+  document.getElementById('detail').classList.remove('show');
+  document.getElementById('backBtn').classList.remove('show');
+  document.getElementById('headerTitle').textContent = tabTitle(tab);
+  state.detail = null;
+}
+
+function tabTitle(tab) {
+  return { strength:'Strength PRs', running:'Running Times', benchmarks:'Benchmarks', custom:'Custom WODs' }[tab];
+}
+
+function openDetail(type, id, name) {
+  state.detail = { type, id, name };
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const d = document.getElementById('detail');
+  d.innerHTML = renderDetail(type, id);
+  d.classList.add('show');
+  document.getElementById('backBtn').classList.add('show');
+  document.getElementById('headerTitle').textContent = name;
+}
+
+function goBack() {
+  document.getElementById('detail').classList.remove('show');
+  document.getElementById('backBtn').classList.remove('show');
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === state.tab + 'Page'));
+  document.getElementById('headerTitle').textContent = tabTitle(state.tab);
+  state.detail = null;
+  renderCurrentTab();
+}
+
+function renderCurrentTab() {
+  const renders = { strength: renderStrength, running: renderRunning, benchmarks: renderBenchmarks, custom: renderCustom };
+  renders[state.tab]?.();
+}
+
+// ─────────────────────────────────────────────
+// STRENGTH PAGE
+// ─────────────────────────────────────────────
+
+function renderStrength() {
+  const cats = [...new Set(MOVEMENTS.map(m => m.cat))];
+  const page = document.getElementById('strengthPage');
+  page.innerHTML = cats.map(cat => {
+    const moves = MOVEMENTS.filter(m => m.cat === cat);
+    return `<div class="group">
+      <div class="group-title">${cat}</div>
+      <div class="list-block">
+        ${moves.map(m => {
+          const entries = getEntries('strength', m.id);
+          const pr = getPR(entries, m.unit);
+          return `<div class="list-row" onclick="openDetail('strength','${m.id}','${m.name}')">
+            <div class="row-left"><div class="row-name">${m.name}</div></div>
+            <div class="row-pr ${pr ? '' : 'none'}">${pr ? pr.val : '— No entries'}</div>
+            <span class="chevron">›</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('') + '<div style="height:24px"></div>';
+}
+
+// ─────────────────────────────────────────────
+// RUNNING PAGE
+// ─────────────────────────────────────────────
+
+function renderRunning() {
+  const page = document.getElementById('runningPage');
+  page.innerHTML = `<div class="group">
+    <div class="group-title">Personal Records</div>
+    <div class="list-block">
+      ${RUNNING.map(r => {
+        const entries = getEntries('running', r.id);
+        const pr = getRunPR(entries);
+        return `<div class="list-row" onclick="openDetail('running','${r.id}','${r.label}')">
+          <div class="row-left"><div class="row-name">${r.label}</div></div>
+          <div class="row-pr ${pr ? '' : 'none'}">${pr ? pr.val : '— No entries'}</div>
+          <span class="chevron">›</span>
+        </div>`;
+      }).join('')}
+    </div>
+  </div><div style="height:24px"></div>`;
+}
+
+// ─────────────────────────────────────────────
+// BENCHMARKS PAGE
+// ─────────────────────────────────────────────
+
+function renderBenchmarks() {
+  const cats = [...new Set(BENCHMARKS.map(b => b.cat))];
+  const page = document.getElementById('benchmarksPage');
+  page.innerHTML = cats.map(cat => {
+    const wods = BENCHMARKS.filter(b => b.cat === cat);
+    return `<div class="group">
+      <div class="group-title">${cat}</div>
+      <div class="list-block">
+        ${wods.map(w => {
+          const entries = getEntries('benchmark', w.id);
+          const pr = getBenchPR(entries);
+          return `<div class="list-row" onclick="openDetail('benchmark','${w.id}','${w.name}')">
+            <div class="row-left">
+              <div class="row-name">${w.name}</div>
+              <div class="row-sub">${w.desc}</div>
+            </div>
+            <div class="row-pr ${pr ? '' : 'none'}" style="text-align:right">${pr ? pr.val : '—'}</div>
+            <span class="chevron">›</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('') + '<div style="height:24px"></div>';
+}
+
+// ─────────────────────────────────────────────
+// CUSTOM WODs PAGE
+// ─────────────────────────────────────────────
+
+function renderCustom() {
+  const wods = getCustomWods();
+  const page = document.getElementById('customPage');
+  page.innerHTML = `<div class="add-row">
+    <button class="add-btn" onclick="openWodModal()">＋ Log a WOD</button>
+  </div>
+  ${wods.length === 0 ? `<div style="text-align:center;padding:48px 20px;color:var(--t2);font-size:14px">No WODs logged yet.</div>` : ''}
+  ${wods.map(w => `
+    <div class="wod-card">
+      <div class="wod-top">
+        <div class="wod-name">${esc(w.name || 'Unnamed WOD')}</div>
+        <div class="wod-date">${fmtDate(w.date)}</div>
+      </div>
+      ${w.score ? `<div class="wod-score">${esc(w.score)}</div>` : ''}
+      ${w.desc ? `<div class="wod-desc">${esc(w.desc)}</div>` : ''}
+      ${w.notes ? `<div class="wod-desc" style="margin-top:6px;font-style:italic">${esc(w.notes)}</div>` : ''}
+      <div class="wod-footer">
+        <button class="del" onclick="rmCustomWod(${w.id})">🗑</button>
+      </div>
+    </div>
+  `).join('')}
+  <div style="height:24px"></div>`;
+}
+
+// ─────────────────────────────────────────────
+// DETAIL VIEW
+// ─────────────────────────────────────────────
+
+function renderDetail(type, id) {
+  const entries = type === 'running' ? getEntries('running', id)
+                : type === 'benchmark' ? getEntries('benchmark', id)
+                : getEntries('strength', id);
+
+  const prHtml = renderPR(type, id, entries);
+  const formHtml = renderForm(type, id);
+  const histHtml = renderHistory(type, id, entries);
+
+  return prHtml + formHtml + histHtml;
+}
+
+function renderPR(type, id, entries) {
+  let pr = null;
+  if (type === 'strength') pr = getPR(entries, MOVEMENTS.find(m => m.id === id)?.unit);
+  else if (type === 'running') pr = getRunPR(entries);
+  else pr = getBenchPR(entries);
+
+  if (!pr) return `<div class="no-pr-card">No entries yet — log your first result below!</div>`;
+  return `<div class="pr-card">
+    <div class="pr-label">Personal Record</div>
+    <div class="pr-val">${pr.val}</div>
+    <div class="pr-date">${fmtDate(pr.date)}</div>
+  </div>`;
+}
+
+function renderForm(type, id) {
+  const mov = MOVEMENTS.find(m => m.id === id);
+  const bench = BENCHMARKS.find(b => b.id === id);
+
+  if (type === 'strength') {
+    const isReps = mov?.unit === 'reps';
+    return `<div class="form-card">
+      <div class="form-title">Log Entry</div>
+      <div class="form-row">
+        <div class="f"><label>Date</label><input type="date" id="fDate" value="${today()}"></div>
+      </div>
+      <div class="form-row">
+        ${isReps
+          ? `<div class="f"><label>Max Reps</label><input type="number" id="fReps" placeholder="e.g. 15" min="1"></div>`
+          : `<div class="f"><label>Weight (kg)</label><input type="number" id="fWeight" placeholder="e.g. 80" step="0.5"></div>
+             <div class="f"><label>Reps</label><input type="number" id="fReps" placeholder="1" value="1" min="1"></div>`
+        }
+      </div>
+      <div class="form-row"><div class="f"><label>Notes</label><textarea id="fNotes" placeholder="e.g. felt strong, PR attempt"></textarea></div></div>
+      <button class="save-btn" onclick="saveStrength('${id}', ${isReps})">Save</button>
+    </div>`;
+  }
+
+  if (type === 'running') {
+    return `<div class="form-card">
+      <div class="form-title">Log Time</div>
+      <div class="form-row">
+        <div class="f"><label>Date</label><input type="date" id="fDate" value="${today()}"></div>
+      </div>
+      <div class="form-row">
+        <div class="f"><label>Minutes</label><input type="number" id="fMins" placeholder="e.g. 3" min="0"></div>
+        <div class="f"><label>Seconds</label><input type="number" id="fSecs" placeholder="e.g. 45" min="0" max="59"></div>
+      </div>
+      <div class="form-row"><div class="f"><label>Notes</label><textarea id="fNotes" placeholder="Conditions, effort level..."></textarea></div></div>
+      <button class="save-btn" onclick="saveRun('${id}')">Save</button>
+    </div>`;
+  }
+
+  if (type === 'benchmark') {
+    const scoreLabel = bench?.type === 'amrap' ? 'Rounds + Reps (e.g. 12+5)' : 'Time (mm:ss)';
+    return `<div class="form-card">
+      <div class="form-title">Log Result</div>
+      <div class="form-row">
+        <div class="f"><label>Date</label><input type="date" id="fDate" value="${today()}"></div>
+        <div class="f"><label>Rx / Scaled</label>
+          <select id="fRx">
+            <option value="rx">Rx</option>
+            <option value="scaled">Scaled</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="f"><label>Score (${scoreLabel})</label><input type="text" id="fScore" placeholder="${bench?.type === 'amrap' ? '12+5' : '18:34'}"></div>
+      </div>
+      <div class="form-row"><div class="f"><label>Notes</label><textarea id="fNotes" placeholder="Scaling, how it felt..."></textarea></div></div>
+      <button class="save-btn" onclick="saveBenchmark('${id}')">Save</button>
+    </div>`;
+  }
+  return '';
+}
+
+function renderHistory(type, id, entries) {
+  if (!entries.length) return '';
+  const rows = entries.map(e => {
+    let score = '';
+    if (type === 'strength') {
+      const unit = MOVEMENTS.find(m => m.id === id)?.unit;
+      score = unit === 'reps' ? `${e.reps} reps` : `${e.weight} kg × ${e.reps}`;
+    } else if (type === 'running') {
+      score = secsToTime(e.secs);
+    } else {
+      score = `${e.score} <span class="${e.rx === 'rx' ? 'rx' : 'sc'}">${e.rx.toUpperCase()}</span>`;
+    }
+    return `<div class="hist-row">
+      <div class="hist-main">
+        <div class="hist-score">${score}</div>
+        ${e.notes ? `<div class="hist-note">${esc(e.notes)}</div>` : ''}
+      </div>
+      <div class="hist-date">${fmtDate(e.date)}</div>
+      <button class="del" onclick="rmEntry('${type}','${id}',${e.id})">🗑</button>
+    </div>`;
+  }).join('');
+  return `<div class="hist-header">History</div><div class="hist-block">${rows}</div>`;
+}
+
+// ─────────────────────────────────────────────
+// SAVE / DELETE
+// ─────────────────────────────────────────────
+
+function saveStrength(id, isReps) {
+  const date = document.getElementById('fDate').value;
+  const notes = document.getElementById('fNotes').value.trim();
+  if (isReps) {
+    const reps = parseInt(document.getElementById('fReps').value);
+    if (!reps) return alert('Enter reps.');
+    addEntry('strength', id, { date, reps, notes });
+  } else {
+    const weight = parseFloat(document.getElementById('fWeight').value);
+    const reps = parseInt(document.getElementById('fReps').value) || 1;
+    if (!weight) return alert('Enter a weight.');
+    addEntry('strength', id, { date, weight, reps, notes });
+  }
+  document.getElementById('detail').innerHTML = renderDetail('strength', id);
+}
+
+function saveRun(id) {
+  const date = document.getElementById('fDate').value;
+  const mins = document.getElementById('fMins').value;
+  const secs = document.getElementById('fSecs').value;
+  const notes = document.getElementById('fNotes').value.trim();
+  const total = timeToSecs(mins, secs);
+  if (!total) return alert('Enter a time.');
+  addEntry('running', id, { date, secs: total, notes });
+  document.getElementById('detail').innerHTML = renderDetail('running', id);
+}
+
+function saveBenchmark(id) {
+  const date = document.getElementById('fDate').value;
+  const score = document.getElementById('fScore').value.trim();
+  const rx = document.getElementById('fRx').value;
+  const notes = document.getElementById('fNotes').value.trim();
+  if (!score) return alert('Enter a score.');
+  addEntry('benchmark', id, { date, score, rx, notes });
+  document.getElementById('detail').innerHTML = renderDetail('benchmark', id);
+}
+
+function rmEntry(type, id, entryId) {
+  if (!confirm('Delete this entry?')) return;
+  deleteEntry(type, id, entryId);
+  document.getElementById('detail').innerHTML = renderDetail(type, id);
+}
+
+// ─────────────────────────────────────────────
+// CUSTOM WOD MODAL
+// ─────────────────────────────────────────────
+
+function openWodModal() {
+  document.getElementById('wDate').value = today();
+  document.getElementById('wName').value = '';
+  document.getElementById('wScore').value = '';
+  document.getElementById('wDesc').value = '';
+  document.getElementById('wNotes').value = '';
+  document.getElementById('wodModal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('wodModal').classList.remove('show');
+}
+
+function saveCustomWod() {
+  const name = document.getElementById('wName').value.trim();
+  if (!name) return alert('Enter a WOD name.');
+  addCustomWod({
+    date:  document.getElementById('wDate').value,
+    name,
+    score: document.getElementById('wScore').value.trim(),
+    desc:  document.getElementById('wDesc').value.trim(),
+    notes: document.getElementById('wNotes').value.trim(),
+  });
+  closeModal();
+  renderCustom();
+}
+
+function rmCustomWod(id) {
+  if (!confirm('Delete this WOD?')) return;
+  deleteCustomWod(id);
+  renderCustom();
+}
+
+// ─────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────
+
+function esc(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Close modal when tapping backdrop
+document.getElementById('wodModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+
+renderStrength();
+renderRunning();
+renderBenchmarks();
+renderCustom();
+document.getElementById('headerTitle').textContent = tabTitle('strength');
+</script>
+</body>
+</html>

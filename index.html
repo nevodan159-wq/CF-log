@@ -220,6 +220,78 @@
     .rx { background: var(--green); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
     .sc { background: var(--s2); color: var(--t2); font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
 
+    /* ── SETTINGS ── */
+    .gear-btn {
+      background: none; border: none; font-size: 20px;
+      cursor: pointer; padding: 4px; color: var(--t2);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .api-key-input { font-size: 13px; letter-spacing: 0.5px; }
+
+    /* ── SCORE MODAL ── */
+    .score-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.65); z-index: 400;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .score-overlay.show { display: flex; }
+    .score-card {
+      background: var(--bg); border-radius: 20px;
+      width: 100%; max-width: 380px;
+      padding: 28px 24px; text-align: center;
+    }
+    .score-num {
+      font-size: 72px; font-weight: 800; line-height: 1;
+      letter-spacing: -3px;
+    }
+    .score-num.elite    { color: #f5c400; }
+    .score-num.competitive { color: #E8292A; }
+    .score-num.advanced { color: #30a86d; }
+    .score-num.intermediate { color: #555; }
+    .score-num.beginner { color: #aaa; }
+    .score-level {
+      font-size: 13px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 2px; color: var(--t2); margin: 4px 0 20px;
+    }
+    .score-percs {
+      display: flex; gap: 12px; margin-bottom: 18px;
+    }
+    .score-perc {
+      flex: 1; background: var(--s1); border-radius: 12px; padding: 12px 8px;
+    }
+    .score-perc-flag { font-size: 22px; margin-bottom: 4px; }
+    .score-perc-val { font-size: 18px; font-weight: 800; }
+    .score-perc-lbl { font-size: 11px; color: var(--t2); margin-top: 2px; }
+    .score-summary {
+      font-size: 14px; color: var(--t2); line-height: 1.6;
+      margin-bottom: 14px; text-align: right;
+    }
+    .score-tip {
+      background: var(--s1); border-radius: 10px;
+      padding: 12px 14px; text-align: right;
+      font-size: 13px; color: var(--text); line-height: 1.5;
+    }
+    .score-tip::before { content: '💡 '; }
+    .score-close {
+      width: 100%; margin-top: 18px;
+      background: var(--accent); color: #fff;
+      font-weight: 700; font-size: 15px; padding: 12px;
+      border: none; border-radius: 10px; cursor: pointer;
+    }
+    .score-loading {
+      padding: 40px 0; color: var(--t2); font-size: 15px;
+    }
+    .score-loading::before { content: '⏳ '; }
+
+    /* ── ANALYZE BUTTON ── */
+    .analyze-btn {
+      background: none; border: 1px solid var(--s3);
+      color: var(--accent); font-size: 12px; font-weight: 600;
+      padding: 4px 10px; border-radius: 20px; cursor: pointer;
+      -webkit-tap-highlight-color: transparent; white-space: nowrap;
+    }
+    .analyze-btn:active { opacity: 0.6; }
+
     /* ── OCR ── */
     .ocr-btn {
       width: 100%; background: var(--s2);
@@ -248,6 +320,7 @@
 <header class="header">
   <button id="backBtn" onclick="goBack()">‹ Back</button>
   <span id="headerTitle">CF Log</span>
+  <button class="gear-btn" onclick="openSettings()" title="Settings">⚙️</button>
 </header>
 
 <!-- PAGES -->
@@ -272,6 +345,35 @@
     <span class="tab-icon">📝</span><span class="tab-label">Custom</span>
   </div>
 </nav>
+
+<!-- SETTINGS MODAL -->
+<div class="overlay" id="settingsModal">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">⚙️ Settings</span>
+      <button class="modal-close" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="form-row"><div class="f">
+      <label>Body Weight (kg)</label>
+      <input type="number" id="sBW" placeholder="e.g. 91" value="91">
+    </div></div>
+    <div class="form-row"><div class="f">
+      <label>Anthropic API Key (for AI scoring)</label>
+      <input type="password" id="sApiKey" class="api-key-input" placeholder="sk-ant-...">
+      <div style="font-size:11px;color:var(--t2);margin-top:4px">
+        Stored only on your device. Get one free at console.anthropic.com
+      </div>
+    </div></div>
+    <button class="save-btn" onclick="saveSettings()">Save Settings</button>
+  </div>
+</div>
+
+<!-- SCORE MODAL -->
+<div class="score-overlay" id="scoreOverlay" onclick="closeScore(event)">
+  <div class="score-card" id="scoreCard">
+    <div class="score-loading">Analyzing your performance...</div>
+  </div>
+</div>
 
 <!-- CUSTOM WOD MODAL -->
 <div class="overlay" id="wodModal">
@@ -619,7 +721,8 @@ function renderCustom() {
       ${w.score ? `<div class="wod-score">${esc(w.score)}</div>` : ''}
       ${w.desc ? `<div class="wod-desc">${esc(w.desc)}</div>` : ''}
       ${w.notes ? `<div class="wod-desc" style="margin-top:6px;font-style:italic">${esc(w.notes)}</div>` : ''}
-      <div class="wod-footer">
+      <div class="wod-footer" style="gap:10px">
+        ${w.desc || w.score ? `<button class="analyze-btn" onclick='analyzeEntry(${JSON.stringify(`custom|${w.name}|${w.score||''}|${w.desc||''}`)})'>🔍 Analyze</button>` : ''}
         <button class="del" onclick="rmCustomWod(${w.id})">🗑</button>
       </div>
     </div>
@@ -722,21 +825,35 @@ function renderHistory(type, id, entries) {
   if (!entries.length) return '';
   const rows = entries.map(e => {
     let score = '';
+    let analyzeArgs = '';
+    const mov  = MOVEMENTS.find(m => m.id === id);
+    const bench = BENCHMARKS.find(b => b.id === id);
+
     if (type === 'strength') {
-      const unit = MOVEMENTS.find(m => m.id === id)?.unit;
+      const unit = mov?.unit;
       score = unit === 'reps' ? `${e.reps} reps` : `${e.weight} kg × ${e.reps}`;
+      analyzeArgs = unit === 'reps'
+        ? `strength|${mov?.name}|reps|${e.reps}|`
+        : `strength|${mov?.name}|weight|${e.weight}|${e.reps}`;
     } else if (type === 'running') {
       score = secsToTime(e.secs);
+      analyzeArgs = '';
     } else {
       score = `${e.score} <span class="${e.rx === 'rx' ? 'rx' : 'sc'}">${e.rx.toUpperCase()}</span>`;
+      analyzeArgs = `benchmark|${bench?.name}|${e.score}|${e.rx}|${bench?.desc||''}`;
     }
+
+    const canAnalyze = type !== 'running';
     return `<div class="hist-row">
       <div class="hist-main">
         <div class="hist-score">${score}</div>
         ${e.notes ? `<div class="hist-note">${esc(e.notes)}</div>` : ''}
       </div>
-      <div class="hist-date">${fmtDate(e.date)}</div>
-      <button class="del" onclick="rmEntry('${type}','${id}',${e.id})">🗑</button>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        ${canAnalyze ? `<button class="analyze-btn" onclick='analyzeEntry(${JSON.stringify(analyzeArgs)})'>🔍</button>` : ''}
+        <div class="hist-date">${fmtDate(e.date)}</div>
+        <button class="del" onclick="rmEntry('${type}','${id}',${e.id})">🗑</button>
+      </div>
     </div>`;
   }).join('');
   return `<div class="hist-header">History</div><div class="hist-block">${rows}</div>`;
@@ -873,6 +990,152 @@ function esc(str) {
 document.getElementById('wodModal').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
+document.getElementById('settingsModal').addEventListener('click', function(e) {
+  if (e.target === this) closeSettings();
+});
+
+// ─────────────────────────────────────────────
+// SETTINGS
+// ─────────────────────────────────────────────
+
+function openSettings() {
+  document.getElementById('sBW').value = localStorage.getItem('cflog_bw') || '91';
+  document.getElementById('sApiKey').value = localStorage.getItem('cflog_apikey') || '';
+  document.getElementById('settingsModal').classList.add('show');
+}
+
+function closeSettings() {
+  document.getElementById('settingsModal').classList.remove('show');
+}
+
+function saveSettings() {
+  const bw = document.getElementById('sBW').value;
+  const key = document.getElementById('sApiKey').value.trim();
+  if (bw) localStorage.setItem('cflog_bw', bw);
+  if (key) localStorage.setItem('cflog_apikey', key);
+  closeSettings();
+  alert('Settings saved ✅');
+}
+
+// ─────────────────────────────────────────────
+// AI SCORING
+// ─────────────────────────────────────────────
+
+const SYSTEM_PROMPT = `You are an expert CrossFit performance analyst with deep knowledge of:
+- CrossFit Open leaderboard data (2018–2024)
+- Israeli CrossFit community performance distributions (~5,000 registered athletes)
+- Worldwide CrossFit athlete performance distributions (~500,000 Open participants)
+- Strength-to-bodyweight standards for CrossFit athletes
+- Benchmark WOD time standards across all skill levels
+
+When analyzing a performance, classify it and compare it to both Israeli and worldwide CrossFit populations.
+
+Respond ONLY with valid JSON in this exact format:
+{
+  "score": <integer 0-100>,
+  "level": "<Beginner|Intermediate|Advanced|Competitive|Elite>",
+  "israel_percentile": <integer 1-99>,
+  "world_percentile": <integer 1-99>,
+  "summary": "<2-3 sentences in Hebrew analyzing the performance>",
+  "tip": "<one actionable Hebrew recommendation>"
+}
+
+Scoring guide: Beginner=0-40, Intermediate=41-65, Advanced=66-80, Competitive=81-90, Elite=91-100.
+Percentile = top X% (e.g. israel_percentile=8 means top 8% in Israel).`;
+
+async function analyzeEntry(argsStr) {
+  const apiKey = localStorage.getItem('cflog_apikey');
+  if (!apiKey) {
+    alert('כדי לקבל ציון — הכנס Anthropic API key בהגדרות ⚙️');
+    openSettings();
+    return;
+  }
+
+  const bw = localStorage.getItem('cflog_bw') || '91';
+  const parts = argsStr.split('|');
+  const type = parts[0];
+
+  let prompt = '';
+  if (type === 'strength') {
+    const [, movement, kind, val1, val2] = parts;
+    if (kind === 'reps') {
+      prompt = `Male CrossFit athlete, bodyweight ${bw}kg.\nMovement: ${movement}\nResult: ${val1} max reps\nAnalyze this gymnastics/bodyweight performance.`;
+    } else {
+      prompt = `Male CrossFit athlete, bodyweight ${bw}kg.\nMovement: ${movement}\nResult: ${val1}kg for ${val2} rep(s)\nAnalyze this strength performance. Consider strength-to-bodyweight ratio.`;
+    }
+  } else if (type === 'benchmark') {
+    const [, wodName, score, rx, desc] = parts;
+    prompt = `Male CrossFit athlete, bodyweight ${bw}kg.\nBenchmark WOD: ${wodName}\nDescription: ${desc}\nResult: ${score} (${rx.toUpperCase()})\nAnalyze this benchmark performance.`;
+  } else if (type === 'custom') {
+    const [, name, score, desc] = parts;
+    prompt = `Male CrossFit athlete, bodyweight ${bw}kg.\nCustom WOD: ${name}\nDescription: ${desc}\nResult/Score: ${score}\nAnalyze this workout performance. If description is unclear, evaluate workout quality and estimated effort.`;
+  }
+
+  // Show loading
+  const overlay = document.getElementById('scoreOverlay');
+  const card = document.getElementById('scoreCard');
+  card.innerHTML = '<div class="score-loading">Analyzing your performance...</div>';
+  overlay.classList.add('show');
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5',
+        max_tokens: 600,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+
+    const json = JSON.parse(data.content[0].text);
+    renderScoreCard(json);
+  } catch (err) {
+    card.innerHTML = `<div style="padding:20px;color:var(--red);font-size:14px">
+      שגיאה: ${err.message}<br><br>
+      <small>בדוק שה-API key נכון בהגדרות.</small>
+    </div>
+    <button class="score-close" onclick="closeScore()">סגור</button>`;
+  }
+}
+
+function renderScoreCard(j) {
+  const levelClass = j.level.toLowerCase();
+  document.getElementById('scoreCard').innerHTML = `
+    <div class="score-num ${levelClass}">${j.score}</div>
+    <div class="score-level">${j.level}</div>
+    <div class="score-percs">
+      <div class="score-perc">
+        <div class="score-perc-flag">🇮🇱</div>
+        <div class="score-perc-val">Top ${j.israel_percentile}%</div>
+        <div class="score-perc-lbl">Israel</div>
+      </div>
+      <div class="score-perc">
+        <div class="score-perc-flag">🌍</div>
+        <div class="score-perc-val">Top ${j.world_percentile}%</div>
+        <div class="score-perc-lbl">Worldwide</div>
+      </div>
+    </div>
+    <div class="score-summary">${j.summary}</div>
+    <div class="score-tip">${j.tip}</div>
+    <button class="score-close" onclick="closeScore()">סגור</button>
+  `;
+}
+
+function closeScore(e) {
+  if (!e || e.target === document.getElementById('scoreOverlay')) {
+    document.getElementById('scoreOverlay').classList.remove('show');
+  }
+}
 
 // ─────────────────────────────────────────────
 // INIT

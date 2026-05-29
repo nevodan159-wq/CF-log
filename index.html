@@ -1073,6 +1073,8 @@ async function analyzeEntry(argsStr) {
     prompt = `Male CrossFit athlete, bodyweight ${bw}kg.\nCustom WOD: ${name}\nDescription: ${desc}\nResult/Score: ${score}\nAnalyze this workout performance. If description is unclear, evaluate workout quality and estimated effort.`;
   }
 
+  prompt += '\n\nIMPORTANT: Your entire response must be in English only. Do not use Hebrew or any other language.';
+
   // Show loading
   const overlay = document.getElementById('scoreOverlay');
   const card = document.getElementById('scoreCard');

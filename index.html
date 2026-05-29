@@ -358,10 +358,10 @@
       <input type="number" id="sBW" placeholder="e.g. 91" value="91">
     </div></div>
     <div class="form-row"><div class="f">
-      <label>Anthropic API Key (for AI scoring)</label>
-      <input type="password" id="sApiKey" class="api-key-input" placeholder="sk-ant-...">
+      <label>Gemini API Key (for AI scoring)</label>
+      <input type="password" id="sApiKey" class="api-key-input" placeholder="AIza...">
       <div style="font-size:11px;color:var(--t2);margin-top:4px">
-        Stored only on your device. Get one free at console.anthropic.com
+        Stored only on your device. Get one free at aistudio.google.com
       </div>
     </div></div>
     <button class="save-btn" onclick="saveSettings()">Save Settings</button>
@@ -1078,26 +1078,25 @@ async function analyzeEntry(argsStr) {
   overlay.classList.add('show');
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5',
-        max_tokens: 600,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: SYSTEM_PROMPT + '\n\n' + prompt }] }],
+          generationConfig: { maxOutputTokens: 600, temperature: 0.3 }
+        })
+      }
+    );
 
     const data = await res.json();
     if (data.error) throw new Error(data.error.message);
 
-    const json = JSON.parse(data.content[0].text);
+    let text = data.candidates[0].content.parts[0].text;
+    // Strip markdown code fences if present
+    text = text.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+    const json = JSON.parse(text);
     renderScoreCard(json);
   } catch (err) {
     card.innerHTML = `<div style="padding:20px;color:var(--red);font-size:14px">

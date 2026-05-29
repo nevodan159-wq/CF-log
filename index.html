@@ -1021,7 +1021,9 @@ function saveSettings() {
 // AI SCORING
 // ─────────────────────────────────────────────
 
-const SYSTEM_PROMPT = `You are an expert CrossFit performance analyst with deep knowledge of:
+const SYSTEM_PROMPT = `LANGUAGE RULE: You must write ONLY in English. Never use Hebrew or any other language. English only.
+
+You are an expert CrossFit performance analyst with deep knowledge of:
 - CrossFit Open leaderboard data (2018–2024)
 - Israeli CrossFit community performance distributions (~5,000 registered athletes)
 - Worldwide CrossFit athlete performance distributions (~500,000 Open participants)
@@ -1030,15 +1032,13 @@ const SYSTEM_PROMPT = `You are an expert CrossFit performance analyst with deep 
 
 When analyzing a performance, classify it and compare it to both Israeli and worldwide CrossFit populations.
 
-IMPORTANT: Always respond in English only, regardless of the athlete's nationality.
-
-Respond ONLY with valid JSON in this exact format:
+Respond ONLY with valid JSON in this exact format. All text fields must be in English:
 {
   "score": <integer 0-100>,
   "level": "<Beginner|Intermediate|Advanced|Competitive|Elite>",
   "israel_percentile": <integer 1-99>,
   "world_percentile": <integer 1-99>,
-  "summary": "<2-3 sentences in English analyzing the performance>",
+  "summary": "<2-3 sentences in English>",
   "tip": "<one actionable recommendation in English>"
 }
 

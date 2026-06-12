@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Month 1 — Training Tracker</title>
+<title>Training Tracker</title>
 <style>
   :root {
     --bg: #0f0f0f;
@@ -31,12 +31,19 @@
   body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif; min-height: 100vh; max-width: 430px; margin: 0 auto; }
 
   /* Header */
-  .app-header { padding: 52px 20px 16px; position: sticky; top: 0; background: var(--bg); z-index: 50; border-bottom: 0.5px solid var(--border); }
-  .app-header-row { display: flex; align-items: center; justify-content: space-between; }
+  .app-header { padding: 52px 20px 14px; position: sticky; top: 0; background: var(--bg); z-index: 50; border-bottom: 0.5px solid var(--border); }
+  .app-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
   .app-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
   .app-title span { color: var(--accent); }
   .pr-open-btn { background: var(--bg3); border: 0.5px solid var(--border2); color: var(--accent); border-radius: var(--radius-sm); padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; }
-  .week-tabs { display: flex; gap: 6px; margin-top: 14px; }
+
+  /* Month tabs */
+  .month-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+  .month-tab { flex: 1; padding: 9px 8px; border-radius: var(--radius-sm); border: 0.5px solid var(--border); background: transparent; color: var(--text2); font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; }
+  .month-tab.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+  /* Week tabs */
+  .week-tabs { display: flex; gap: 6px; }
   .week-tab { flex: 1; padding: 8px 4px; border-radius: var(--radius-sm); border: 0.5px solid var(--border); background: transparent; color: var(--text2); font-size: 12px; font-weight: 500; cursor: pointer; text-align: center; transition: all 0.15s; }
   .week-tab.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
 
@@ -76,11 +83,12 @@
   .check-circle svg { display: none; }
   .check-circle.checked svg { display: block; }
   .has-log-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); opacity: 0.6; }
+  .new-badge { font-size: 9px; font-weight: 700; background: var(--accent); color: #0f0f0f; padding: 2px 5px; border-radius: 4px; margin-left: 6px; vertical-align: middle; }
 
-  /* ── SESSION MODAL ── */
+  /* SESSION MODAL */
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; }
   .modal-overlay.open { display: block; }
-  .session-modal { position: fixed; inset: 0; top: 0; background: var(--bg); z-index: 300; display: none; flex-direction: column; overflow: hidden; }
+  .session-modal { position: fixed; inset: 0; background: var(--bg); z-index: 300; display: none; flex-direction: column; overflow: hidden; }
   .session-modal.open { display: flex; }
   .modal-header { padding: 52px 16px 14px; background: var(--bg2); border-bottom: 0.5px solid var(--border); flex-shrink: 0; }
   .modal-header-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
@@ -98,13 +106,23 @@
   .exercise-list { display: flex; flex-direction: column; gap: 0; }
   .exercise-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 0.5px solid var(--border); }
   .exercise-row:last-child { border-bottom: none; }
-  .exercise-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 1px; align-self: flex-start; margin-top: 6px; }
+  .exercise-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; align-self: flex-start; margin-top: 6px; }
   .exercise-text { flex: 1; font-size: 13px; color: var(--text2); line-height: 1.4; }
   .exercise-log-input { width: 90px; flex-shrink: 0; background: var(--bg3); border: 0.5px solid var(--border2); border-radius: 6px; color: var(--text); font-size: 12px; padding: 5px 8px; outline: none; font-family: inherit; text-align: center; }
   .exercise-log-input:focus { border-color: var(--accent); }
-  .exercise-log-input::placeholder { color: var(--text3); }
+  .exercise-log-input::placeholder { color: var(--text3); font-size: 11px; }
 
-  /* Photo section in modal */
+  /* Fields log section (Month 2 style) */
+  .fields-log-section { margin-top: 20px; background: var(--bg3); border-radius: var(--radius-sm); padding: 14px; }
+  .fields-log-title { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; }
+  .field-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 0.5px solid var(--border); }
+  .field-row:last-child { border-bottom: none; }
+  .field-label { flex: 1; font-size: 13px; color: var(--text2); }
+  .field-input { width: 110px; flex-shrink: 0; background: var(--bg2); border: 0.5px solid var(--border2); border-radius: 6px; color: var(--text); font-size: 12px; padding: 6px 10px; outline: none; font-family: inherit; text-align: center; }
+  .field-input:focus { border-color: var(--accent); }
+  .field-input::placeholder { color: var(--text3); font-size: 11px; }
+
+  /* Photo section */
   .photo-section { margin-top: 20px; }
   .photo-upload-box { border: 1px dashed var(--border2); border-radius: var(--radius-sm); min-height: 100px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; }
   .photo-upload-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-sm); }
@@ -145,8 +163,12 @@
 
 <div class="app-header">
   <div class="app-header-row">
-    <div class="app-title">Month 1 <span>/ Training</span></div>
+    <div class="app-title" id="appTitle">Month 1 <span>/ Training</span></div>
     <button class="pr-open-btn" onclick="openPR()">🏆 PRs</button>
+  </div>
+  <div class="month-tabs">
+    <button class="month-tab active" id="mTab_m1" onclick="switchMonth('m1')">Month 1</button>
+    <button class="month-tab" id="mTab_m2" onclick="switchMonth('m2')">Month 2</button>
   </div>
   <div class="week-tabs" id="weekTabs"></div>
 </div>
@@ -198,7 +220,8 @@
 <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(event)" />
 
 <script>
-const SESSIONS = {
+// ── Month 1 Sessions ──────────────────────────────────────
+const M1_SESSIONS = {
   w1: [
     { day:'Mon', tag:'skill', tagLabel:'Skill', title:'HSPU foundations', sub:'Strict only, light',
       why:'Week 1 is a deload. Reset the nervous system after the competition.',
@@ -444,36 +467,370 @@ const SESSIONS = {
   ]
 };
 
+// ── Month 2 Sessions ──────────────────────────────────────
+const M2_SESSIONS = {
+  w1: [
+    { day:'Mon', tag:'skill', tagLabel:'Skill', title:'HSPU — 2cm deficit', sub:'Strict, volume build', isNew:true,
+      why:'Month 2 opens with a real deficit. 2cm changes the range of motion significantly — expect the numbers to drop vs month 1 max. That is the point.',
+      warmup:'12 min — shoulder CARs, thoracic rotation, 5 wall walks to prime the position.',
+      main:[
+        {text:'5×4 strict HSPU with 2cm deficit (two 1kg plates each hand)'},
+        {text:'Pause 1 sec at the top of every rep — lockout is the target'},
+        {text:'3×8 DB Z-press — increase weight from month 1'},
+        {text:'3×12 face pulls + 3×10 prone Y-raises (new — upper trap activation)'},
+      ],
+      fields:[{id:'hspu_reps',label:'Best set with deficit (reps)'},{id:'deficit',label:'Deficit used (cm)'}],
+      load:'Moderate. If lockout fails on any rep, remove the deficit for the remaining sets.', duration:'50 min' },
+
+    { day:'Tue', tag:'zone2', tagLabel:'Zone 2', title:'Zone 2 + sprints', sub:'30 min easy + 5×10 sec', isNew:true,
+      why:"First sprint session of the program. 10-sec max efforts with 2-min full rest. This builds the top-end gear you don't have from WODs alone.",
+      warmup:'10 min easy jog. Then: high knees, butt kicks, A-skips × 2 each.',
+      main:[
+        {text:'30 min easy run at 70% max HR (130-140 bpm)'},
+        {text:'Rest 3 min'},
+        {text:'5 × 10 sec sprints at 85-90% max effort'},
+        {text:'Full 2 min walk recovery between each sprint'},
+        {text:'Focus: relaxed shoulders, drive from the hip'},
+      ],
+      fields:[{id:'zone2_pace',label:'Zone 2 avg pace (min/km)'},{id:'sprint_feel',label:'Sprint mechanics feel (1-10)'}],
+      load:'Zone 2 part easy. Sprints are NOT all-out — 85-90%, controlled mechanics.', duration:'55 min' },
+
+    { day:'Wed', tag:'strength', tagLabel:'Strength', title:'Squat — build', sub:'85% 1RM + carries',
+      why:'Month 2 squat work sits at 85-88% — heavier than anything in month 1. Carries added as a finisher.',
+      warmup:'12 min, hip mobility, goblet squat.',
+      main:[
+        {text:'Back squat: 5×3 @ 140 kg'},
+        {text:'Front squat: 4×2 @ 122 kg'},
+        {text:'Farmers carry: 3×40m @ heavy'},
+        {text:'Overhead carry: 2×20m per arm (light KB) — active shoulder lockout'},
+      ],
+      fields:[{id:'bs_weight',label:'Back squat weight (kg)'},{id:'fs_weight',label:'Front squat weight (kg)'}],
+      load:'Squat sets are heavy but all reps clean. No grinding.', duration:'65 min' },
+
+    { day:'Thu', tag:'wod', tagLabel:'WOD', title:'AMRAP 20', sub:'Longer time domain',
+      why:'Month 2 WODs shift to longer time domains. 20-min AMRAP tests the aerobic engine built in month 1.',
+      warmup:'10 min.',
+      main:[
+        {text:'20 min AMRAP:'},
+        {text:'5 power cleans @ 80 kg'},
+        {text:'10 C2B pull-ups'},
+        {text:'15 wall balls (9 kg)'},
+        {text:'200m run'},
+      ],
+      fields:[{id:'rounds',label:'Rounds + reps completed'},{id:'run_pace',label:'200m run pace consistent? (yes/no)'}],
+      load:'Sustainable pace — same round split from min 1 to min 20.', duration:'35 min' },
+
+    { day:'Fri', tag:'skill', tagLabel:'Skill', title:'Snatch — heavy', sub:'Up to 92-95% 1RM',
+      why:'Month 2 snatch loading approaches near-maximal singles. The lockout work from month 1 should now allow heavier loads.',
+      warmup:'12 min, overhead mobility, snatch balance with empty bar.',
+      main:[
+        {text:'Snatch: work up to 100-103 kg (93-95% of 108)'},
+        {text:'Every rep: standard setup, no rushing'},
+        {text:'Drop to 82 kg for 3×2 if singles felt solid'},
+        {text:'Snatch pull: 3×3 @ 115 kg — focus on lat engagement'},
+      ],
+      fields:[{id:'snatch_top',label:'Heaviest snatch (kg)'},{id:'lockout',label:'Lockout quality (1-10)'}],
+      load:'Stop if lockout quality drops. A missed rep at 100 kg is better than a sloppy make.', duration:'65 min' },
+
+    { day:'Sat', tag:'zone2', tagLabel:'Zone 2', title:'Long run', sub:'55 min @ 70% HR',
+      why:'Progressive overload on long run — 55 min this month vs 50 min at end of month 1.',
+      warmup:'5 min walk.',
+      main:[
+        {text:'55 min easy run at 70% max HR'},
+        {text:'Compare pace to month 1 week 4 — you should be faster at the same HR'},
+        {text:'Track average pace'},
+      ],
+      fields:[{id:'run_pace',label:'Avg pace (min/km)'},{id:'run_hr',label:'Avg HR (bpm)'}],
+      load:'HR under 145. This is an aerobic session, not a tempo run.', duration:'60 min' }
+  ],
+  w2: [
+    { day:'Mon', tag:'skill', tagLabel:'Skill', title:'HSPU — volume increase', sub:'2cm deficit, more sets',
+      why:'Second week at 2cm deficit. Volume goes up — 6 sets instead of 5.',
+      warmup:'12 min shoulder prep.',
+      main:[
+        {text:'6×4 strict HSPU with 2cm deficit'},
+        {text:"If all 4 reps are clean across all sets, add a 3rd plate (3cm) next week"},
+        {text:'4×8 DB Z-press'},
+        {text:'3×10 prone Y-raises + 3×10 band pull-aparts'},
+      ],
+      fields:[{id:'hspu_reps',label:'Best set with deficit (reps)'},{id:'all_sets_clean',label:'All 6 sets completed? (yes/no)'}],
+      load:'Moderate-heavy. Stop each set 1 rep before failure.', duration:'50 min' },
+
+    { day:'Tue', tag:'zone2', tagLabel:'Zone 2', title:'Zone 2 + sprints', sub:'30 min + 6×10 sec',
+      why:'One extra sprint rep vs week 1. Volume builds slowly.',
+      warmup:'10 min easy + movement drills.',
+      main:[
+        {text:'30 min easy run at 70% HR'},
+        {text:'Rest 3 min'},
+        {text:'6 × 10 sec sprints — 2 min walk recovery each'},
+        {text:'Note: are you recovering faster between sprints than last week?'},
+      ],
+      fields:[{id:'zone2_pace',label:'Zone 2 avg pace (min/km)'},{id:'recovery_quality',label:'Recovery between sprints (1-10)'}],
+      load:'Same intensity as week 1. Focus on recovery quality.', duration:'55 min' },
+
+    { day:'Wed', tag:'strength', tagLabel:'Strength', title:'Squat — heavy', sub:'87% 1RM',
+      why:'Progressive loading week 2.',
+      warmup:'12 min.',
+      main:[
+        {text:'Back squat: 4×3 @ 143 kg'},
+        {text:'Front squat: 3×2 @ 125 kg'},
+        {text:'Box squat: 3×4 @ 110 kg — full stop method'},
+        {text:'Farmers carry: 3×40m — increase weight vs week 1'},
+      ],
+      fields:[{id:'bs_weight',label:'Back squat weight (kg)'},{id:'box_squat_weight',label:'Box squat weight (kg)'}],
+      load:'Heavy. Each set should feel like an 8/10 effort.', duration:'65 min' },
+
+    { day:'Thu', tag:'wod', tagLabel:'WOD', title:'For time', sub:'Heavy chipper, 18-22 min',
+      why:'WOD with barbell cycling — tests how the aerobic base holds up with repeated heavy movement.',
+      warmup:'10 min.',
+      main:[
+        {text:'For time:'},
+        {text:'1000m row'},
+        {text:'21 thrusters @ 50 kg'},
+        {text:'15 bar muscle-ups (or 21 C2B + 10 ring dips if no BMU)'},
+        {text:'21 thrusters @ 50 kg'},
+        {text:'1000m row'},
+      ],
+      fields:[{id:'wod_time',label:'Total time (mm:ss)'},{id:'thrusters_unbroken',label:'Thrusters unbroken each set? (yes/no)'}],
+      load:'85% effort. First row should NOT be max effort — you have thrusters coming.', duration:'40 min' },
+
+    { day:'Fri', tag:'skill', tagLabel:'Skill', title:'Clean & Jerk — build', sub:'Up to 90% 1RM',
+      why:'C&J loading progresses. Focus remains on jerk lockout quality.',
+      warmup:'12 min.',
+      main:[
+        {text:'Power clean: 5×2 @ 100 kg — bar path and catch position'},
+        {text:'Clean & Jerk: work up to 115 kg (90% of 127.5)'},
+        {text:'Push jerk: 4×3 @ 95 kg — pause 2 sec at lockout each rep'},
+        {text:'Overhead carry: 2×20m KB overhead each arm'},
+      ],
+      fields:[{id:'cj_top',label:'Heaviest C&J (kg)'},{id:'jerk_lockout',label:'Jerk lockout quality (1-10)'}],
+      load:'No misses on jerk. If it looks ugly, drop weight.', duration:'65 min' },
+
+    { day:'Sat', tag:'zone2', tagLabel:'Zone 2', title:'Long row', sub:'55 min @ 70% HR',
+      why:'Alternating long run / long row between weeks gives the legs a break while maintaining aerobic volume.',
+      warmup:'5 min easy.',
+      main:[
+        {text:'55 min rowing at 70% HR'},
+        {text:'Maintain consistent stroke rate — aim for 20-22 spm'},
+        {text:'Note your 500m split — compare to month 1'},
+      ],
+      fields:[{id:'row_500_split',label:'Avg 500m split'},{id:'row_hr',label:'Avg HR (bpm)'}],
+      load:'Steady state. If HR climbs above 145, lower the pace.', duration:'60 min' }
+  ],
+  w3: [
+    { day:'Mon', tag:'skill', tagLabel:'Skill', title:'HSPU — 3cm deficit', sub:'New depth, strict', isNew:true,
+      why:'Week 3 introduces 3cm deficit. Expect reps to drop — this is normal. The range of motion increase is significant.',
+      warmup:'12 min — extra shoulder prep today.',
+      main:[
+        {text:'4×3 strict HSPU with 3cm deficit'},
+        {text:'If lockout fails on any rep, drop to 2cm and finish the set'},
+        {text:'4×8 DB Z-press heavy'},
+        {text:'3×8 strict chin-ups (antagonist balance)'},
+        {text:'3×12 prone Y-raises'},
+      ],
+      fields:[{id:'hspu_reps',label:'Best set at 3cm (reps)'},{id:'deficit_used',label:'Deficit actually used (cm)'}],
+      load:'This will be hard. 3 clean reps at 3cm > 5 sloppy reps at 2cm.', duration:'55 min' },
+
+    { day:'Tue', tag:'zone2', tagLabel:'Zone 2', title:'Fartlek + sprints', sub:'25 min fartlek + 5×10 sec', isNew:true,
+      why:'Combining Fartlek with post-run sprints. The Fartlek raises the lactate threshold, the sprints train the top-end gear.',
+      warmup:'10 min easy + drills.',
+      main:[
+        {text:'25 min Fartlek: 400m @ 70% HR / 200m @ 80% HR — repeat'},
+        {text:'Rest 3 min'},
+        {text:'5 × 10 sec sprints — 2 min recovery each'},
+        {text:'The sprints after Fartlek will feel harder — that is the point'},
+      ],
+      fields:[{id:'fartlek_feel',label:'Fartlek recovery speed (1-10)'},{id:'sprint_feel',label:'Sprint quality vs tired (1-10)'}],
+      load:'This is the hardest aerobic session of month 2. Manage it.', duration:'55 min' },
+
+    { day:'Wed', tag:'strength', tagLabel:'Strength', title:'Squat — max week', sub:'90% 1RM + test',
+      why:'Week 3 is the heavy week. Back squat targets 90% for doubles.',
+      warmup:'15 min, thorough.',
+      main:[
+        {text:'Back squat: 4×2 @ 148 kg (90%)'},
+        {text:'Front squat: 3×1 @ 130 kg — heavy singles'},
+        {text:'Box squat: 3×3 @ 115 kg'},
+        {text:'Overhead carry: 3×20m KB overhead each arm — heavier than previous weeks'},
+      ],
+      fields:[{id:'bs_weight',label:'Back squat weight (kg)'},{id:'fs_weight',label:'Front squat weight (kg)'}],
+      load:'These are heavy. Take 3-4 min between sets. No rushing.', duration:'70 min' },
+
+    { day:'Thu', tag:'wod', tagLabel:'WOD', title:'Long EMOM', sub:'30 min, mixed modal',
+      why:'Month 2 week 3 WOD is the longest yet — 30 min EMOM tests the aerobic base directly.',
+      warmup:'10 min.',
+      main:[
+        {text:'30 min EMOM (6 rounds):'},
+        {text:'Min 1: 14 cal bike'},
+        {text:'Min 2: 10 hang power snatches @ 60 kg'},
+        {text:'Min 3: 12 C2B pull-ups'},
+        {text:'Min 4: 12 box jumps (24") step down'},
+        {text:'Min 5: 8 strict HSPU (no deficit)'},
+      ],
+      fields:[{id:'completed',label:'All 6 rounds completed? (yes/no)'},{id:'hspu_unbroken',label:'HSPU unbroken each min? (yes/no)'}],
+      load:'This is a volume test. Pace yourself — round 6 should look like round 1.', duration:'40 min' },
+
+    { day:'Fri', tag:'skill', tagLabel:'Skill', title:'Snatch + C&J — combined', sub:'Both lifts, moderate load',
+      why:'Week 3 combines both lifts in one session — mimics competition format.',
+      warmup:'12 min.',
+      main:[
+        {text:'Snatch: 5 singles @ 95 kg — standard setup each rep'},
+        {text:'Rest 8 min'},
+        {text:'Clean & Jerk: 5 singles @ 112 kg'},
+        {text:'Focus: transition between the two lifts mentally, same process each time'},
+        {text:'Snatch balance: 3×3 @ 70 kg to finish'},
+      ],
+      fields:[{id:'snatch_makes',label:'Snatch makes at 95 (out of 5)'},{id:'cj_makes',label:'C&J makes at 112 (out of 5)'}],
+      load:'Not a max day. Consistent, quality reps.', duration:'70 min' },
+
+    { day:'Sat', tag:'zone2', tagLabel:'Zone 2', title:'Long run', sub:'60 min @ 70% HR',
+      why:'60 min — the longest Zone 2 run of the program so far.',
+      warmup:'5 min walk.',
+      main:[
+        {text:'60 min easy run at 70% HR'},
+        {text:'This is a milestone — 60 min aerobic run is where real cardiac adaptations compound'},
+        {text:'Track pace vs week 1 and month 1'},
+      ],
+      fields:[{id:'run_pace',label:'Avg pace (min/km)'},{id:'run_hr',label:'Avg HR (bpm)'}],
+      load:'HR under 145 the entire time. Walk if needed.', duration:'65 min' }
+  ],
+  w4: [
+    { day:'Mon', tag:'skill', tagLabel:'Skill', title:'HSPU — test week', sub:'Max strict with deficit',
+      why:'End of month 2 test. Max strict HSPU with deficit — compare to month 1 max of 8 (no deficit).',
+      warmup:'12 min thorough shoulder prep.',
+      main:[
+        {text:'Test 1: Max strict HSPU with 2cm deficit — record'},
+        {text:'Rest 6 min'},
+        {text:'Test 2: Max strict HSPU NO deficit — record'},
+        {text:'Compare to month 1 baseline of 8 reps'},
+        {text:'3×8 Z-press to finish'},
+      ],
+      fields:[{id:'hspu_deficit_max',label:'Max with 2cm deficit (reps)'},{id:'hspu_no_deficit_max',label:'Max no deficit (reps)'}],
+      load:'Max effort on test sets only.', duration:'50 min' },
+
+    { day:'Tue', tag:'zone2', tagLabel:'Zone 2', title:'Zone 2 + sprints test', sub:'30 min + 6×10 sec timed',
+      why:'Sprint test — time your 10-sec efforts to measure power output development.',
+      warmup:'10 min easy + full sprint drills.',
+      main:[
+        {text:'30 min easy run'},
+        {text:'Rest 3 min'},
+        {text:'6 × 10 sec sprints — time each one or note distance covered'},
+        {text:'Compare effort quality to week 1 sprints'},
+        {text:'Full 2 min recovery each'},
+      ],
+      fields:[{id:'sprint_quality',label:'Sprint quality vs month start (1-10)'},{id:'zone2_pace',label:'Zone 2 pace (min/km)'}],
+      load:'True near-max effort on sprints today.', duration:'55 min' },
+
+    { day:'Wed', tag:'strength', tagLabel:'Strength', title:'Squat — 3RM test', sub:'New 3RM back squat',
+      why:'Month 2 strength test — targeting 165+ kg for 3 reps.',
+      warmup:'15 min build-up.',
+      main:[
+        {text:'Work up to a 3RM back squat'},
+        {text:'Target: 165-170 kg for 3'},
+        {text:'Front squat: 3×2 @ 125 kg after the 3RM'},
+      ],
+      fields:[{id:'bs_3rm',label:'3RM achieved (kg)'},{id:'fs_weight',label:'Front squat weight (kg)'}],
+      load:'Max effort on the 3RM.', duration:'65 min' },
+
+    { day:'Thu', tag:'wod', tagLabel:'WOD', title:'3km run test', sub:'Time trial',
+      why:'The key benchmark. Month 1 target was sub-12:00. Month 2 target: sub-11:45.',
+      warmup:'10 min easy + 3×100m strides.',
+      main:[
+        {text:'3km run time trial — full effort'},
+        {text:'Pacing: aim for even splits, 3:55/km'},
+        {text:'Record km splits'},
+        {text:'Compare to month 1 result'},
+      ],
+      fields:[{id:'run_3km',label:'3km time (mm:ss)'},{id:'km_splits',label:'km splits (e.g. 3:55/3:52/3:48)'}],
+      load:'Max effort.', duration:'30 min' },
+
+    { day:'Fri', tag:'skill', tagLabel:'Skill', title:'Snatch + C&J — heavy test', sub:'Near-max singles',
+      why:'Month 2 lifting test. Snatch target: 112-115 kg. C&J target: 132.5 kg.',
+      warmup:'12 min.',
+      main:[
+        {text:'Snatch: work up to heavy single — target 112 kg'},
+        {text:'Rest 10 min'},
+        {text:'Clean & Jerk: work up to heavy single — target 132.5 kg'},
+        {text:'Both lifts: quality over weight'},
+      ],
+      fields:[{id:'snatch_top',label:'Heaviest snatch (kg)'},{id:'cj_top',label:'Heaviest C&J (kg)'}],
+      load:'Stop if position breaks.', duration:'70 min' },
+
+    { day:'Sat', tag:'zone2', tagLabel:'Zone 2', title:'Recovery row', sub:'30 min easy',
+      why:'Deload after test week.',
+      warmup:'3 min easy.',
+      main:[
+        {text:'30 min easy rowing at 60-65% HR'},
+        {text:'Recovery session only'},
+        {text:'Reflect on month 2 progress'},
+      ],
+      fields:[{id:'row_feel',label:'How you felt overall (1-10)'},{id:'notes_month',label:'Month 2 reflection'}],
+      load:'Very easy. Cut shorter if tired.', duration:'35 min' }
+  ]
+};
+
+// ── Config ────────────────────────────────────────────────
 const WEEKS = ['w1','w2','w3','w4'];
 const WEEK_NAMES = { w1:'Week 1', w2:'Week 2', w3:'Week 3', w4:'Week 4' };
+const MONTH_SUBTITLES = {
+  m1: 'HSPU foundations · Zone 2 base · Snatch technique',
+  m2: 'Sprint work · Deficit HSPU · Heavier loading'
+};
+
+// Month 1 starts June 29, 2025 (Monday)
+const M1_START = new Date(2025, 5, 29);
+// Month 2 starts July 27, 2025 (28 days later)
+const M2_START = new Date(2025, 6, 27);
+
+let currentMonth = 'm1';
 let currentWeek = 'w1';
 
-// Dates — Week 1 starts Monday 29 June 2025
-const START_DATE = new Date(2025, 5, 29);
-function getSessionDate(weekIndex, dayIndex) {
-  const d = new Date(START_DATE);
+function getSessions() { return currentMonth === 'm1' ? M1_SESSIONS : M2_SESSIONS; }
+function getStartDate() { return currentMonth === 'm1' ? M1_START : M2_START; }
+
+// ── Date helpers ──────────────────────────────────────────
+function getSessionDate(weekIndex, dayIndex, month) {
+  const start = month === 'm1' ? M1_START : M2_START;
+  const d = new Date(start);
   d.setDate(d.getDate() + weekIndex * 7 + dayIndex);
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
-function getSessionDateObj(weekIndex, dayIndex) {
-  const d = new Date(START_DATE);
+function getSessionDateObj(weekIndex, dayIndex, month) {
+  const start = month === 'm1' ? M1_START : M2_START;
+  const d = new Date(start);
   d.setDate(d.getDate() + weekIndex * 7 + dayIndex);
   return d;
 }
 
 // ── Storage helpers ───────────────────────────────────────
-function getLog(wk, idx)       { try { return JSON.parse(localStorage.getItem(`log_${wk}_${idx}`) || 'null'); } catch(e) { return null; } }
-function saveLog(wk, idx, d)   { try { localStorage.setItem(`log_${wk}_${idx}`, JSON.stringify(d)); } catch(e) {} }
-function isDone(wk, idx)       { try { return localStorage.getItem(`done_${wk}_${idx}`) === '1'; } catch(e) { return false; } }
-function setDone(wk, idx, v)   { try { localStorage.setItem(`done_${wk}_${idx}`, v ? '1' : '0'); } catch(e) {} }
-function getPhoto(wk, idx)     { try { return localStorage.getItem(`photo_${wk}_${idx}`) || null; } catch(e) { return null; } }
-function savePhoto(wk, idx, v) { try { if(v) localStorage.setItem(`photo_${wk}_${idx}`, v); else localStorage.removeItem(`photo_${wk}_${idx}`); } catch(e) {} }
-function getMainLog(wk, idx, mi) { return localStorage.getItem(`ml_${wk}_${idx}_${mi}`) || ''; }
-function saveMainLog(wk, idx, mi, v) { try { if(v) localStorage.setItem(`ml_${wk}_${idx}_${mi}`, v); else localStorage.removeItem(`ml_${wk}_${idx}_${mi}`); } catch(e) {} }
+// Month 1 keys: log_, done_, photo_, ml_  (unchanged — backward compatible)
+// Month 2 keys: m2log_, m2done_, m2photo_, m2ml_, m2f_
+function _pfx(m) { return m === 'm1' ? '' : 'm2'; }
+
+function getLog(wk, idx, m)       { m=m||currentMonth; try { return JSON.parse(localStorage.getItem(`${_pfx(m)}log_${wk}_${idx}`) || 'null'); } catch(e) { return null; } }
+function saveLog(wk, idx, d, m)   { m=m||currentMonth; try { localStorage.setItem(`${_pfx(m)}log_${wk}_${idx}`, JSON.stringify(d)); } catch(e) {} }
+function isDone(wk, idx, m)       { m=m||currentMonth; try { return localStorage.getItem(`${_pfx(m)}done_${wk}_${idx}`) === '1'; } catch(e) { return false; } }
+function setDone(wk, idx, v, m)   { m=m||currentMonth; try { localStorage.setItem(`${_pfx(m)}done_${wk}_${idx}`, v ? '1' : '0'); } catch(e) {} }
+function getPhoto(wk, idx, m)     { m=m||currentMonth; try { return localStorage.getItem(`${_pfx(m)}photo_${wk}_${idx}`) || null; } catch(e) { return null; } }
+function savePhoto(wk, idx, v, m) { m=m||currentMonth; try { if(v) localStorage.setItem(`${_pfx(m)}photo_${wk}_${idx}`, v); else localStorage.removeItem(`${_pfx(m)}photo_${wk}_${idx}`); } catch(e) {} }
+function getMainLog(wk, idx, mi, m) { m=m||currentMonth; return localStorage.getItem(`${_pfx(m)}ml_${wk}_${idx}_${mi}`) || ''; }
+function saveMainLog(wk, idx, mi, v, m) { m=m||currentMonth; try { if(v) localStorage.setItem(`${_pfx(m)}ml_${wk}_${idx}_${mi}`, v); else localStorage.removeItem(`${_pfx(m)}ml_${wk}_${idx}_${mi}`); } catch(e) {} }
+function getFieldLog(wk, idx, fid, m) { m=m||currentMonth; return localStorage.getItem(`${_pfx(m)}f_${wk}_${idx}_${fid}`) || ''; }
+function saveFieldLog(wk, idx, fid, v, m) { m=m||currentMonth; try { if(v) localStorage.setItem(`${_pfx(m)}f_${wk}_${idx}_${fid}`, v); else localStorage.removeItem(`${_pfx(m)}f_${wk}_${idx}_${fid}`); } catch(e) {} }
 
 function getWeekProgress(wk) {
-  const s = SESSIONS[wk];
-  return { done: s.filter((_,i) => isDone(wk,i)).length, total: s.length };
+  const s = getSessions()[wk];
+  return { done: s.filter((_,i) => isDone(wk, i)).length, total: s.length };
+}
+
+// ── Month switcher ────────────────────────────────────────
+function switchMonth(m) {
+  currentMonth = m;
+  currentWeek = 'w1';
+  document.getElementById('mTab_m1').className = 'month-tab' + (m === 'm1' ? ' active' : '');
+  document.getElementById('mTab_m2').className = 'month-tab' + (m === 'm2' ? ' active' : '');
+  const titles = { m1: 'Month 1', m2: 'Month 2' };
+  document.getElementById('appTitle').innerHTML = `${titles[m]} <span>/ Training</span>`;
+  render();
 }
 
 // ── Tomorrow banner ───────────────────────────────────────
@@ -481,20 +838,25 @@ function renderTomorrow() {
   const el = document.getElementById('tomorrowBanner');
   const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
   tomorrow.setHours(0,0,0,0);
-  for (let wi = 0; wi < WEEKS.length; wi++) {
-    const wk = WEEKS[wi];
-    for (let di = 0; di < SESSIONS[wk].length; di++) {
-      const d = getSessionDateObj(wi, di);
-      d.setHours(0,0,0,0);
-      if (d.getTime() === tomorrow.getTime()) {
-        const s = SESSIONS[wk][di];
-        el.innerHTML = `
-          <div class="tomorrow-banner" onclick="openModal('${wk}',${di})">
-            <div class="tomorrow-label">Tomorrow · ${s.day} ${getSessionDate(wi, di)}</div>
-            <div class="tomorrow-title">${s.title}</div>
-            <div class="tomorrow-sub">${s.sub} · ${s.duration}</div>
-          </div>`;
-        return;
+  const months = ['m1','m2'];
+  const sessionsMap = { m1: M1_SESSIONS, m2: M2_SESSIONS };
+  for (const mn of months) {
+    for (let wi = 0; wi < WEEKS.length; wi++) {
+      const wk = WEEKS[wi];
+      for (let di = 0; di < sessionsMap[mn][wk].length; di++) {
+        const d = getSessionDateObj(wi, di, mn);
+        d.setHours(0,0,0,0);
+        if (d.getTime() === tomorrow.getTime()) {
+          const s = sessionsMap[mn][wk][di];
+          const dateStr = getSessionDate(wi, di, mn);
+          el.innerHTML = `
+            <div class="tomorrow-banner" onclick="switchMonth('${mn}');currentWeek='${wk}';render();openModal('${wk}',${di})">
+              <div class="tomorrow-label">Tomorrow · ${s.day} ${dateStr}</div>
+              <div class="tomorrow-title">${s.title}</div>
+              <div class="tomorrow-sub">${s.sub} · ${s.duration}</div>
+            </div>`;
+          return;
+        }
       }
     }
   }
@@ -528,12 +890,14 @@ function renderDays() {
   list.innerHTML = '';
   const weekIndex = WEEKS.indexOf(currentWeek);
 
-  SESSIONS[currentWeek].forEach((s, idx) => {
+  getSessions()[currentWeek].forEach((s, idx) => {
     const done = isDone(currentWeek, idx);
     const log = getLog(currentWeek, idx);
     const photo = getPhoto(currentWeek, idx);
-    const hasLog = log || photo || s.main.some((_,mi) => getMainLog(currentWeek, idx, mi));
-    const dateStr = getSessionDate(weekIndex, idx);
+    const hasMainLog = s.main.some((_,mi) => getMainLog(currentWeek, idx, mi));
+    const hasFieldLog = s.fields && s.fields.some(f => getFieldLog(currentWeek, idx, f.id));
+    const hasLog = log || photo || hasMainLog || hasFieldLog;
+    const dateStr = getSessionDate(weekIndex, idx, currentMonth);
 
     const card = document.createElement('div');
     card.className = 'day-card' + (done ? ' done' : '');
@@ -544,7 +908,7 @@ function renderDays() {
           <span class="day-date">${dateStr}</span>
         </div>
         <div class="day-info">
-          <div class="day-title">${s.title}</div>
+          <div class="day-title">${s.title}${s.isNew ? '<span class="new-badge">NEW</span>' : ''}</div>
           <div class="day-sub">${s.sub}</div>
         </div>
         <div class="day-right">
@@ -568,13 +932,13 @@ function toggleDone(e, wk, idx) {
 }
 
 // ── Session Modal ─────────────────────────────────────────
-let modalWk = null, modalIdx = null;
+let modalWk = null, modalIdx = null, modalMonth = null;
 
 function openModal(wk, idx) {
-  modalWk = wk; modalIdx = idx;
-  const s = SESSIONS[wk][idx];
+  modalWk = wk; modalIdx = idx; modalMonth = currentMonth;
+  const s = getSessions()[wk][idx];
   const weekIndex = WEEKS.indexOf(wk);
-  const dateStr = getSessionDate(weekIndex, idx);
+  const dateStr = getSessionDate(weekIndex, idx, currentMonth);
   const done = isDone(wk, idx);
   const log = getLog(wk, idx) || {};
   const photo = getPhoto(wk, idx);
@@ -591,20 +955,42 @@ function openModal(wk, idx) {
       <span class="tag tag-${s.tag}">${s.tagLabel}</span>
     </div>`;
 
-  // Body
+  // Exercise rows (Month 1 style: objects with optional log)
   const exerciseRows = s.main.map((item, mi) => {
-    const savedVal = getMainLog(wk, idx, mi);
-    const inputHTML = item.log
+    const isObj = typeof item === 'object';
+    const text = isObj ? item.text : item;
+    const hasLog = isObj && item.log;
+    const savedVal = hasLog ? getMainLog(wk, idx, mi, currentMonth) : '';
+    const inputHTML = hasLog
       ? `<input class="exercise-log-input" type="text" placeholder="${item.log}" value="${savedVal}"
-           onchange="saveMainLog('${wk}',${idx},${mi},this.value)" />`
+           onchange="saveMainLog('${wk}',${idx},${mi},this.value,'${currentMonth}')" />`
       : '';
     return `<div class="exercise-row">
       <div class="exercise-dot"></div>
-      <div class="exercise-text">${item.text}</div>
+      <div class="exercise-text">${text}</div>
       ${inputHTML}
     </div>`;
   }).join('');
 
+  // Fields section (Month 2 style: separate fields array)
+  let fieldsHTML = '';
+  if (s.fields && s.fields.length) {
+    const fieldRows = s.fields.map(f => {
+      const saved = getFieldLog(wk, idx, f.id, currentMonth);
+      return `<div class="field-row">
+        <span class="field-label">${f.label}</span>
+        <input class="field-input" type="text" placeholder="—" value="${saved}"
+          onchange="saveFieldLog('${wk}',${idx},'${f.id}',this.value,'${currentMonth}')" />
+      </div>`;
+    }).join('');
+    fieldsHTML = `
+      <div class="fields-log-section">
+        <div class="fields-log-title">Session log</div>
+        ${fieldRows}
+      </div>`;
+  }
+
+  // Photo
   const photoHTML = photo
     ? `<img src="${photo}" /><button class="photo-remove show" onclick="removePhoto()">✕</button>`
     : '<div class="photo-upload-placeholder"><span style="font-size:22px">📷</span><span>Add photo</span></div>';
@@ -622,6 +1008,7 @@ function openModal(wk, idx) {
       <div class="modal-section-label">Main work</div>
       <div class="exercise-list">${exerciseRows}</div>
     </div>
+    ${fieldsHTML}
     <div class="modal-section">
       <div class="modal-section-label">Load note</div>
       <div class="modal-text">${s.load}</div>
@@ -659,15 +1046,15 @@ function closeModal() {
 
 function saveModal() {
   const notes = document.getElementById('modalNotes')?.value?.trim() || '';
-  saveLog(modalWk, modalIdx, { notes });
+  saveLog(modalWk, modalIdx, { notes }, modalMonth);
   const c = document.getElementById('saveConfirm');
   if (c) { c.textContent = '✓ Saved'; setTimeout(() => { if(c) c.textContent=''; }, 2000); }
   render();
 }
 
 function toggleModalDone() {
-  const newVal = !isDone(modalWk, modalIdx);
-  setDone(modalWk, modalIdx, newVal);
+  const newVal = !isDone(modalWk, modalIdx, modalMonth);
+  setDone(modalWk, modalIdx, newVal, modalMonth);
   const btn = document.getElementById('modalDoneBtn');
   if (btn) { btn.textContent = newVal ? '✓ Done' : 'Mark done'; btn.className = 'btn-done' + (newVal ? ' is-done' : ''); }
   render();
@@ -683,7 +1070,6 @@ function handlePhoto(e) {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = ev => {
-    // Compress via canvas
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
@@ -693,7 +1079,7 @@ function handlePhoto(e) {
       canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
       const compressed = canvas.toDataURL('image/jpeg', 0.7);
-      savePhoto(modalWk, modalIdx, compressed);
+      savePhoto(modalWk, modalIdx, compressed, modalMonth);
       const box = document.getElementById('photoBox');
       if (box) {
         box.innerHTML = `<img src="${compressed}" /><button class="photo-remove show" onclick="removePhoto()">✕</button>`;
@@ -707,7 +1093,7 @@ function handlePhoto(e) {
 
 function removePhoto() {
   event.stopPropagation();
-  savePhoto(modalWk, modalIdx, null);
+  savePhoto(modalWk, modalIdx, null, modalMonth);
   const box = document.getElementById('photoBox');
   if (box) box.innerHTML = '<div class="photo-upload-placeholder"><span style="font-size:22px">📷</span><span>Add photo</span></div>';
 }

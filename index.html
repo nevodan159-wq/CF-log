@@ -32,8 +32,10 @@
 
   /* Header */
   .app-header { padding: 52px 20px 16px; position: sticky; top: 0; background: var(--bg); z-index: 50; border-bottom: 0.5px solid var(--border); }
+  .app-header-row { display: flex; align-items: center; justify-content: space-between; }
   .app-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
   .app-title span { color: var(--accent); }
+  .pr-open-btn { background: var(--bg3); border: 0.5px solid var(--border2); color: var(--accent); border-radius: var(--radius-sm); padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; }
   .week-tabs { display: flex; gap: 6px; margin-top: 14px; }
   .week-tab { flex: 1; padding: 8px 4px; border-radius: var(--radius-sm); border: 0.5px solid var(--border); background: transparent; color: var(--text2); font-size: 12px; font-weight: 500; cursor: pointer; text-align: center; transition: all 0.15s; }
   .week-tab.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
@@ -45,12 +47,21 @@
   .prog-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s; }
   .prog-pct { font-size: 11px; color: var(--text2); min-width: 28px; text-align: right; }
 
+  /* Tomorrow banner */
+  .tomorrow-banner { margin: 4px 16px 0; background: var(--bg2); border: 0.5px solid rgba(232,255,71,0.2); border-radius: var(--radius); padding: 12px 14px; cursor: pointer; }
+  .tomorrow-label { font-size: 10px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+  .tomorrow-title { font-size: 14px; font-weight: 600; }
+  .tomorrow-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
   /* Day list */
   .day-list { padding: 8px 16px 100px; display: flex; flex-direction: column; gap: 8px; }
-  .day-card { background: var(--bg2); border-radius: var(--radius); border: 0.5px solid var(--border); overflow: hidden; }
+  .day-card { background: var(--bg2); border-radius: var(--radius); border: 0.5px solid var(--border); overflow: hidden; cursor: pointer; transition: border-color 0.15s; }
   .day-card.done { border-color: rgba(232,255,71,0.2); }
-  .day-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; }
-  .day-name { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.6px; width: 28px; flex-shrink: 0; }
+  .day-card:active { opacity: 0.85; }
+  .day-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+  .day-name-col { display: flex; flex-direction: column; align-items: center; width: 36px; flex-shrink: 0; gap: 1px; }
+  .day-name { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.6px; }
+  .day-date { font-size: 10px; color: var(--text3); white-space: nowrap; }
   .day-info { flex: 1; min-width: 0; }
   .day-title { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.2; }
   .day-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
@@ -64,39 +75,58 @@
   .check-circle.checked { background: var(--accent); border-color: var(--accent); }
   .check-circle svg { display: none; }
   .check-circle.checked svg { display: block; }
+  .has-log-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); opacity: 0.6; }
 
-  /* Expanded session */
-  .day-detail { display: none; padding: 0 16px 16px; border-top: 0.5px solid var(--border); }
-  .day-detail.open { display: block; }
-  .detail-section { margin-top: 14px; }
-  .detail-label { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
-  .detail-body { font-size: 13px; color: var(--text2); line-height: 1.6; }
-  .detail-list { list-style: none; }
-  .detail-list li { padding: 4px 0; border-bottom: 0.5px solid var(--border); font-size: 13px; color: var(--text2); }
-  .detail-list li:last-child { border-bottom: none; }
-  .detail-list li::before { content: '·'; color: var(--accent); margin-right: 8px; font-weight: 700; }
+  /* ── SESSION MODAL ── */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; }
+  .modal-overlay.open { display: block; }
+  .session-modal { position: fixed; inset: 0; top: 0; background: var(--bg); z-index: 300; display: none; flex-direction: column; overflow: hidden; }
+  .session-modal.open { display: flex; }
+  .modal-header { padding: 52px 16px 14px; background: var(--bg2); border-bottom: 0.5px solid var(--border); flex-shrink: 0; }
+  .modal-header-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .modal-back { background: var(--bg3); border: none; color: var(--text2); border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer; font-family: inherit; }
+  .modal-day-badge { font-size: 11px; color: var(--text3); }
+  .modal-title { font-size: 20px; font-weight: 700; }
+  .modal-sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
+  .modal-meta { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+  .modal-body { flex: 1; overflow-y: auto; padding: 0 16px 120px; }
+  .modal-section { margin-top: 20px; }
+  .modal-section-label { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
+  .modal-text { font-size: 13px; color: var(--text2); line-height: 1.6; }
 
-  /* Log form */
-  .log-section { margin-top: 16px; background: var(--bg3); border-radius: var(--radius-sm); padding: 14px; }
-  .log-title { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; }
-  .log-row { display: flex; gap: 8px; margin-bottom: 8px; }
-  .log-field { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-  .log-field label { font-size: 11px; color: var(--text3); }
-  .log-field input, .log-field textarea { background: var(--bg2); border: 0.5px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-size: 13px; padding: 8px 10px; width: 100%; outline: none; font-family: inherit; }
-  .log-field input:focus, .log-field textarea:focus { border-color: var(--accent); }
-  .log-field textarea { resize: none; height: 70px; }
-  .log-actions { display: flex; gap: 8px; margin-top: 10px; }
-  .btn-save { flex: 1; background: var(--accent); color: #0f0f0f; border: none; border-radius: var(--radius-sm); padding: 10px; font-size: 13px; font-weight: 700; cursor: pointer; }
-  .btn-clear { background: transparent; border: 0.5px solid var(--border2); color: var(--text2); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; cursor: pointer; }
-  .saved-badge { font-size: 11px; color: var(--zone2); display: none; align-items: center; gap: 4px; }
-  .saved-badge.show { display: flex; }
+  /* Exercise rows with inline log */
+  .exercise-list { display: flex; flex-direction: column; gap: 0; }
+  .exercise-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 0.5px solid var(--border); }
+  .exercise-row:last-child { border-bottom: none; }
+  .exercise-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 1px; align-self: flex-start; margin-top: 6px; }
+  .exercise-text { flex: 1; font-size: 13px; color: var(--text2); line-height: 1.4; }
+  .exercise-log-input { width: 90px; flex-shrink: 0; background: var(--bg3); border: 0.5px solid var(--border2); border-radius: 6px; color: var(--text); font-size: 12px; padding: 5px 8px; outline: none; font-family: inherit; text-align: center; }
+  .exercise-log-input:focus { border-color: var(--accent); }
+  .exercise-log-input::placeholder { color: var(--text3); }
+
+  /* Photo section in modal */
+  .photo-section { margin-top: 20px; }
+  .photo-upload-box { border: 1px dashed var(--border2); border-radius: var(--radius-sm); min-height: 100px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; }
+  .photo-upload-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-sm); }
+  .photo-upload-placeholder { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text3); font-size: 12px; pointer-events: none; position: relative; z-index: 1; }
+  .photo-remove { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); border: none; color: #fff; border-radius: 50%; width: 26px; height: 26px; font-size: 12px; cursor: pointer; z-index: 2; display: none; }
+  .photo-remove.show { display: flex; align-items: center; justify-content: center; }
+
+  /* Modal footer */
+  .modal-footer { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background: var(--bg); border-top: 0.5px solid var(--border); padding: 12px 16px 28px; display: none; flex-direction: column; gap: 8px; z-index: 310; }
+  .modal-footer.open { display: flex; }
+  .modal-notes-input { background: var(--bg3); border: 0.5px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-size: 13px; padding: 8px 10px; outline: none; font-family: inherit; resize: none; height: 52px; width: 100%; }
+  .modal-notes-input:focus { border-color: var(--accent); }
+  .modal-btn-row { display: flex; gap: 8px; }
+  .btn-save { flex: 1; background: var(--accent); color: #0f0f0f; border: none; border-radius: var(--radius-sm); padding: 11px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
+  .btn-done { background: var(--bg3); border: 0.5px solid var(--border2); color: var(--text2); border-radius: var(--radius-sm); padding: 11px 14px; font-size: 13px; cursor: pointer; font-family: inherit; white-space: nowrap; }
+  .btn-done.is-done { border-color: var(--accent); color: var(--accent); }
+  .save-confirm { font-size: 11px; color: var(--zone2); text-align: center; min-height: 14px; }
 
   /* PR Panel */
-  .pr-btn { position: fixed; bottom: 24px; right: 20px; width: 50px; height: 50px; border-radius: 50%; background: var(--accent); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 4px 16px rgba(232,255,71,0.35); z-index: 200; transition: transform 0.15s; }
-  .pr-btn:active { transform: scale(0.92); }
-  .pr-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 300; display: none; }
+  .pr-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 400; display: none; }
   .pr-overlay.open { display: block; }
-  .pr-panel { position: fixed; top: 0; right: 0; bottom: 0; width: min(340px, 100vw); background: var(--bg2); z-index: 400; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); overflow-y: auto; padding: 52px 20px 40px; }
+  .pr-panel { position: fixed; top: 0; right: 0; bottom: 0; width: min(340px,100vw); background: var(--bg2); z-index: 500; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); overflow-y: auto; padding: 52px 20px 40px; }
   .pr-panel.open { transform: translateX(0); }
   .pr-panel-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
   .pr-panel-sub { font-size: 12px; color: var(--text3); margin-bottom: 24px; }
@@ -109,20 +139,15 @@
   .pr-field input:focus { border-color: var(--accent); }
   .pr-save-btn { width: 100%; margin-top: 24px; background: var(--accent); color: #0f0f0f; border: none; border-radius: var(--radius-sm); padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer; }
   .pr-saved { text-align: center; font-size: 12px; color: var(--zone2); margin-top: 10px; min-height: 18px; }
-
-  /* Logged data display */
-  .log-display { margin-top: 10px; padding: 10px; background: var(--bg2); border-radius: var(--radius-sm); border: 0.5px solid rgba(232,255,71,0.2); display: none; }
-  .log-display.show { display: block; }
-  .log-display-row { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; }
-  .log-display-row span:first-child { color: var(--text3); }
-  .log-display-row span:last-child { color: var(--text); font-weight: 500; }
-  .log-display-notes { font-size: 12px; color: var(--text2); margin-top: 6px; padding-top: 6px; border-top: 0.5px solid var(--border); font-style: italic; }
 </style>
 </head>
 <body>
 
 <div class="app-header">
-  <div class="app-title">Month 1 <span>/ Training</span></div>
+  <div class="app-header-row">
+    <div class="app-title">Month 1 <span>/ Training</span></div>
+    <button class="pr-open-btn" onclick="openPR()">🏆 PRs</button>
+  </div>
   <div class="week-tabs" id="weekTabs"></div>
 </div>
 
@@ -132,42 +157,45 @@
   <span class="prog-pct" id="progPct">0%</span>
 </div>
 
+<div id="tomorrowBanner"></div>
 <div class="day-list" id="dayList"></div>
 
-<!-- PR Button -->
-<button class="pr-btn" onclick="openPR()" title="Personal Records">🏆</button>
+<!-- Session Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
+<div class="session-modal" id="sessionModal">
+  <div class="modal-header" id="modalHeader"></div>
+  <div class="modal-body" id="modalBody"></div>
+  <div class="modal-footer" id="modalFooter"></div>
+</div>
 
 <!-- PR Panel -->
 <div class="pr-overlay" id="prOverlay" onclick="closePR()"></div>
 <div class="pr-panel" id="prPanel">
   <button class="pr-close" onclick="closePR()">✕</button>
   <div class="pr-panel-title">Personal Records</div>
-  <div class="pr-panel-sub">Update your PRs — they're saved to this device</div>
-
+  <div class="pr-panel-sub">Your PRs — saved to this device</div>
   <div class="pr-section-label">💪 Weightlifting</div>
   <div class="pr-field"><label>Back Squat 1RM (kg)</label><input type="number" id="pr_bs" placeholder="—" /></div>
   <div class="pr-field"><label>Front Squat 1RM (kg)</label><input type="number" id="pr_fs" placeholder="—" /></div>
   <div class="pr-field"><label>Snatch 1RM (kg)</label><input type="number" id="pr_snatch" placeholder="—" /></div>
   <div class="pr-field"><label>Clean & Jerk 1RM (kg)</label><input type="number" id="pr_cj" placeholder="—" /></div>
   <div class="pr-field"><label>Deadlift 1RM (kg)</label><input type="number" id="pr_dl" placeholder="—" /></div>
-
   <div class="pr-section-label">🤸 Gymnastics</div>
   <div class="pr-field"><label>Strict HSPU max reps</label><input type="number" id="pr_hspu" placeholder="—" /></div>
   <div class="pr-field"><label>Strict Pull-ups max reps</label><input type="number" id="pr_pullup" placeholder="—" /></div>
   <div class="pr-field"><label>Ring Muscle-ups max reps</label><input type="number" id="pr_rmu" placeholder="—" /></div>
-
   <div class="pr-section-label">🏃 Running</div>
   <div class="pr-field"><label>3km time (mm:ss)</label><input type="text" id="pr_3km" placeholder="—" /></div>
   <div class="pr-field"><label>5km time (mm:ss)</label><input type="text" id="pr_5km" placeholder="—" /></div>
   <div class="pr-field"><label>400m time (mm:ss)</label><input type="text" id="pr_400m" placeholder="—" /></div>
-
   <div class="pr-section-label">⏱ Benchmarks</div>
   <div class="pr-field"><label>Fran (mm:ss)</label><input type="text" id="pr_fran" placeholder="—" /></div>
   <div class="pr-field"><label>Grace (mm:ss)</label><input type="text" id="pr_grace" placeholder="—" /></div>
-
   <button class="pr-save-btn" onclick="savePRs()">Save PRs</button>
   <div class="pr-saved" id="prSaved"></div>
 </div>
+
+<input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(event)" />
 
 <script>
 const SESSIONS = {
@@ -175,153 +203,244 @@ const SESSIONS = {
     { day:'Mon', tag:'skill', tagLabel:'Skill', title:'HSPU foundations', sub:'Strict only, light',
       why:'Week 1 is a deload. Reset the nervous system after the competition.',
       warmup:'10 min easy movement, shoulder CARs, thoracic rotation.',
-      main:['5×5 strict HSPU — stop 2 reps before failure','Focus: full lockout, pause 1 sec at top','3×8 DB Z-press (seated) — light, lockout focus','3×10 banded pull-aparts'],
-      load:'Low. If 5 reps is too easy, add a 5kg plate under feet.', duration:'45 min',
-      fields:[{id:'hspu_reps',label:'Strict HSPU reps (best set)'},{id:'zspress_weight',label:'Z-press weight (kg)'}] },
+      main:[
+        { text:'5×5 strict HSPU — stop 2 reps before failure', log:'Reps (best set)' },
+        { text:'Focus: full lockout, pause 1 sec at top' },
+        { text:'3×8 DB Z-press (seated) — light, lockout focus', log:'Weight used (kg)' },
+        { text:'3×10 banded pull-aparts' },
+      ],
+      load:'Low. If 5 reps is too easy, add a 5kg plate under feet.', duration:'45 min' },
     { day:'Tue', tag:'zone2', tagLabel:'Zone 2', title:'Easy run', sub:'30 min @ 70% HR',
       why:'Zone 2 running builds the aerobic base. Target 130-140 bpm.',
       warmup:'5 min walk.',
-      main:['30 min easy run at 70% max HR','Target HR: 130-140 bpm','If HR climbs above 145, walk until it drops','No music — focus on breathing and foot strike'],
-      load:'This will feel embarrassingly slow. That is correct.', duration:'35 min',
-      fields:[{id:'run_duration',label:'Actual duration (min)'},{id:'run_avg_hr',label:'Avg HR (bpm)'}] },
+      main:[
+        { text:'30 min easy run at 70% max HR', log:'Actual duration (min)' },
+        { text:'Target HR: 130-140 bpm', log:'Avg HR (bpm)' },
+        { text:'If HR climbs above 145, walk until it drops' },
+        { text:'No music — focus on breathing and foot strike' },
+      ],
+      load:'This will feel embarrassingly slow. That is correct.', duration:'35 min' },
     { day:'Wed', tag:'strength', tagLabel:'Strength', title:'Squat — deload', sub:'70% 1RM, technique',
       why:'Rebuilding the movement pattern fresh. Not a testing day.',
       warmup:'10 min general, goblet squat mobility.',
-      main:['Back squat: 5×4 @ 115 kg','Pause squat: 3×3 @ 90 kg — 3 sec pause','Box squat: 3×5 @ 80 kg — full stop, drive through heels'],
-      load:'70% of 1RM. No grinding reps.', duration:'50 min',
-      fields:[{id:'bs_weight',label:'Back squat weight used (kg)'},{id:'bs_notes_feel',label:'How it felt (1-10)'}] },
+      main:[
+        { text:'Back squat: 5×4 @ 115 kg', log:'Weight used (kg)' },
+        { text:'Pause squat: 3×3 @ 90 kg — 3 sec pause', log:'Weight used (kg)' },
+        { text:'Box squat: 3×5 @ 80 kg — full stop, drive through heels', log:'How it felt (1-10)' },
+      ],
+      load:'70% of 1RM. No grinding reps.', duration:'50 min' },
     { day:'Thu', tag:'wod', tagLabel:'WOD', title:'Short chipper', sub:'Light, technique focus',
       why:'Keeping movement patterns alive during deload. Intensity deliberately low.',
       warmup:'10 min general.',
-      main:['For time (cap 12 min):','30 box jumps (step down)','20 DB hang power cleans (light — 22.5 kg)','10 ring rows','20 DB hang power cleans','30 box jumps'],
-      load:'60-65% effort. Stop if you are pushing harder.', duration:'40 min',
-      fields:[{id:'wod_time',label:'Time (mm:ss)'},{id:'wod_feel',label:'Effort feel (1-10)'}] },
+      main:[
+        { text:'For time (cap 12 min):' },
+        { text:'30 box jumps (step down)', log:'Time split' },
+        { text:'20 DB hang power cleans — 22.5 kg', log:'Weight used (kg)' },
+        { text:'10 ring rows' },
+        { text:'20 DB hang power cleans' },
+        { text:'30 box jumps', log:'Total time (mm:ss)' },
+      ],
+      load:'60-65% effort. Stop if you are pushing harder.', duration:'40 min' },
     { day:'Fri', tag:'skill', tagLabel:'Skill', title:'Snatch technique', sub:'Positional work only',
       why:'Post-competition week. Technique reset with light loads.',
       warmup:'10 min, PVC overhead squat work.',
-      main:['Snatch balance: 5×3 @ 50 kg — pause in hole 2 sec','Hang snatch: 5×2 @ 60 kg — focus on turnover','Overhead squat: 3×5 @ 60 kg — pause at bottom'],
-      load:'No more than 60% of 1RM.', duration:'50 min',
-      fields:[{id:'snatch_top',label:'Heaviest snatch (kg)'},{id:'snatch_feel',label:'Lockout quality (1-10)'}] },
+      main:[
+        { text:'Snatch balance: 5×3 @ 50 kg — pause in hole 2 sec', log:'Weight used (kg)' },
+        { text:'Hang snatch: 5×2 @ 60 kg — focus on turnover', log:'Top weight (kg)' },
+        { text:'Overhead squat: 3×5 @ 60 kg — pause at bottom', log:'Lockout quality (1-10)' },
+      ],
+      load:'No more than 60% of 1RM.', duration:'50 min' },
     { day:'Sat', tag:'zone2', tagLabel:'Zone 2', title:'Row or bike', sub:'40 min @ 70% HR',
       why:'Second Zone 2 session. Non-impact — gives legs a break.',
       warmup:'5 min easy.',
-      main:['Choose: rowing machine or Assault/Echo bike','40 min continuous at 70% max HR (130-140 bpm)','Same rule: if HR climbs, slow down'],
-      load:'Steady state, conversational pace.', duration:'45 min',
-      fields:[{id:'row_duration',label:'Actual duration (min)'},{id:'row_avg_hr',label:'Avg HR (bpm)'}] }
+      main:[
+        { text:'Choose: rowing machine or Assault/Echo bike' },
+        { text:'40 min continuous at 70% max HR (130-140 bpm)', log:'Actual duration (min)' },
+        { text:'Same rule: if HR climbs, slow down', log:'Avg HR (bpm)' },
+      ],
+      load:'Steady state, conversational pace.', duration:'45 min' }
   ],
   w2: [
     { day:'Mon', tag:'skill', tagLabel:'Skill', title:'HSPU strength', sub:'Strict volume build',
       why:'Small increase in pressing volume. Still no deficit.',
       warmup:'10 min, shoulder CARs, thoracic.',
-      main:['6×4 strict HSPU — stop 1-2 reps before failure','If 4 reps feels easy, add 5kg plate under feet','4×8 DB Z-press — increase weight from week 1','3×12 face pulls with band'],
-      load:'Moderate. Finish each set with 2 reps in the tank.', duration:'45 min',
-      fields:[{id:'hspu_reps',label:'Strict HSPU reps (best set)'},{id:'zspress_weight',label:'Z-press weight (kg)'}] },
+      main:[
+        { text:'6×4 strict HSPU — stop 1-2 reps before failure', log:'Best set reps' },
+        { text:'If 4 reps feels easy, add 5kg plate under feet' },
+        { text:'4×8 DB Z-press — increase weight from week 1', log:'Weight used (kg)' },
+        { text:'3×12 face pulls with band' },
+      ],
+      load:'Moderate. Finish each set with 2 reps in the tank.', duration:'45 min' },
     { day:'Tue', tag:'zone2', tagLabel:'Zone 2', title:'Run + strides', sub:'35 min + 4×20 sec',
       why:'Strides after Zone 2 train running economy without raising aerobic load.',
       warmup:'5 min walk.',
-      main:['35 min easy run at 70% max HR','Then: 4×20 sec strides at ~90% pace — walk back to recover','Strides are relaxed, fast, controlled — not sprints'],
-      load:'Zone 2 portion stays easy. Strides are brief and fully recovered.', duration:'45 min',
-      fields:[{id:'run_pace',label:'Avg Zone 2 pace (min/km)'},{id:'run_avg_hr',label:'Avg HR (bpm)'}] },
+      main:[
+        { text:'35 min easy run at 70% max HR', log:'Avg pace (min/km)' },
+        { text:'Then: 4×20 sec strides at ~90% pace — walk back to recover', log:'Avg HR (bpm)' },
+        { text:'Strides are relaxed, fast, controlled — not sprints' },
+      ],
+      load:'Zone 2 portion stays easy. Strides are brief and fully recovered.', duration:'45 min' },
     { day:'Wed', tag:'strength', tagLabel:'Strength', title:'Squat — build', sub:'75-80% 1RM',
       why:'First real loading week. Building back up from deload.',
       warmup:'10 min, hip mobility.',
-      main:['Back squat: 4×4 @ 125 kg','Front squat: 3×3 @ 110 kg','Bulgarian split squat: 3×8 each leg'],
-      load:'Moderate. All reps technically clean.', duration:'55 min',
-      fields:[{id:'bs_weight',label:'Back squat weight used (kg)'},{id:'fs_weight',label:'Front squat weight used (kg)'}] },
+      main:[
+        { text:'Back squat: 4×4 @ 125 kg', log:'Weight used (kg)' },
+        { text:'Front squat: 3×3 @ 110 kg', log:'Weight used (kg)' },
+        { text:'Bulgarian split squat: 3×8 each leg', log:'Weight used (kg)' },
+      ],
+      load:'Moderate. All reps technically clean.', duration:'55 min' },
     { day:'Thu', tag:'wod', tagLabel:'WOD', title:'EMOM 20', sub:'Mixed, moderate effort',
-      why:'20-min EMOM trains aerobic threshold — methodology article method.',
+      why:'20-min EMOM trains aerobic threshold.',
       warmup:'10 min.',
-      main:['20 min EMOM (5 rounds):','Min 1: 12 cal row','Min 2: 8 hang power cleans @ 60 kg','Min 3: 10 box jumps (24")','Min 4: 10 kipping HSPU'],
-      load:'75-80% effort. Finish each minute with 10-15 sec to spare.', duration:'35 min',
-      fields:[{id:'emom_completed',label:'All 5 rounds completed? (yes/no)'},{id:'hspu_unbroken',label:'HSPU unbroken each set? (yes/no)'}] },
+      main:[
+        { text:'20 min EMOM (5 rounds):' },
+        { text:'Min 1: 12 cal row', log:'Avg cals/round' },
+        { text:'Min 2: 8 hang power cleans @ 60 kg', log:'All rounds unbroken? (y/n)' },
+        { text:'Min 3: 10 box jumps (24")' },
+        { text:'Min 4: 10 kipping HSPU', log:'Unbroken each set? (y/n)' },
+      ],
+      load:'75-80% effort. Finish each minute with 10-15 sec to spare.', duration:'35 min' },
     { day:'Fri', tag:'skill', tagLabel:'Skill', title:'Clean & Jerk', sub:'Positional + light singles',
       why:'Introducing structured lifting. Week 2 still technique-focused.',
       warmup:'10 min, thoracic mobility.',
-      main:['Clean pulls: 4×4 @ 90 kg — lat engagement, bar path','Power clean + front squat + jerk: 5×(1+1+1) @ 90 kg','Push jerk: 5×3 @ 80 kg — lockout focus'],
-      load:'No more than 72% of C&J 1RM.', duration:'55 min',
-      fields:[{id:'cj_top',label:'Heaviest C&J (kg)'},{id:'jerk_lockout',label:'Jerk lockout quality (1-10)'}] },
+      main:[
+        { text:'Clean pulls: 4×4 @ 90 kg — lat engagement, bar path', log:'Weight used (kg)' },
+        { text:'Power clean + front squat + jerk: 5×(1+1+1) @ 90 kg', log:'Top weight (kg)' },
+        { text:'Push jerk: 5×3 @ 80 kg — lockout focus', log:'Lockout quality (1-10)' },
+      ],
+      load:'No more than 72% of C&J 1RM.', duration:'55 min' },
     { day:'Sat', tag:'zone2', tagLabel:'Zone 2', title:'Long run', sub:'45 min @ 70% HR',
       why:'Progressive Zone 2 overload — 5 min more than last week.',
       warmup:'5 min walk.',
-      main:['45 min continuous run at 70% max HR','Focus: relaxed shoulders, upright posture','Note your average pace — this is your aerobic baseline'],
-      load:'HR must stay under 145 throughout.', duration:'50 min',
-      fields:[{id:'run_pace',label:'Avg pace (min/km)'},{id:'run_avg_hr',label:'Avg HR (bpm)'}] }
+      main:[
+        { text:'45 min continuous run at 70% max HR', log:'Avg pace (min/km)' },
+        { text:'Focus: relaxed shoulders, upright posture', log:'Avg HR (bpm)' },
+        { text:'Note your average pace — this is your aerobic baseline' },
+      ],
+      load:'HR must stay under 145 throughout.', duration:'50 min' }
   ],
   w3: [
     { day:'Mon', tag:'skill', tagLabel:'Skill', title:'HSPU — deficit intro', sub:'1cm deficit, strict',
       why:'First deficit — very small (1cm). About range of motion, not loading.',
       warmup:'10 min, shoulder CARs.',
-      main:['4×4 strict HSPU with 1cm deficit (one 1kg plate each hand)','If lockout fails, remove deficit and continue','4×6 DB Z-press — increase weight again','3×10 strict chin-ups'],
-      load:'Moderate. The deficit will feel harder than expected.', duration:'50 min',
-      fields:[{id:'hspu_reps',label:'Strict HSPU reps with deficit (best set)'},{id:'deficit_size',label:'Deficit used (cm)'}] },
+      main:[
+        { text:'4×4 strict HSPU with 1cm deficit (one 1kg plate each hand)', log:'Best set reps' },
+        { text:'If lockout fails, remove deficit and continue' },
+        { text:'4×6 DB Z-press — increase weight again', log:'Weight used (kg)' },
+        { text:'3×10 strict chin-ups', log:'Weight added (kg)' },
+      ],
+      load:'Moderate. The deficit will feel harder than expected.', duration:'50 min' },
     { day:'Tue', tag:'zone2', tagLabel:'Zone 2', title:'Fartlek run', sub:'35 min varied pace',
       why:'Introducing Fartlek — mixing Zone 2 and Zone 3 to begin training the lactate threshold.',
       warmup:'5 min walk.',
-      main:['35 min run:','400m @ 70% HR, then 200m @ 80% HR — repeat','Focus: recovery speed between the 80% efforts'],
-      load:'More demanding than previous Zone 2 runs. Intentional.', duration:'40 min',
-      fields:[{id:'run_feel',label:'Recovery speed between surges (1-10)'},{id:'run_avg_hr',label:'Overall avg HR (bpm)'}] },
+      main:[
+        { text:'35 min run:' },
+        { text:'400m @ 70% HR, then 200m @ 80% HR — repeat', log:'Recovery speed (1-10)' },
+        { text:'Focus: recovery speed between the 80% efforts', log:'Overall avg HR (bpm)' },
+      ],
+      load:'More demanding than previous Zone 2 runs. Intentional.', duration:'40 min' },
     { day:'Wed', tag:'strength', tagLabel:'Strength', title:'Squat — heavy', sub:'82-85% 1RM',
       why:'Third week — time to push the squat loading.',
       warmup:'12 min, thorough.',
-      main:['Back squat: 5×3 @ 140 kg','Front squat: 4×2 @ 120 kg','Box squat: 3×5 @ 100 kg — full stop method'],
-      load:'Heavy but not maximal. All sets completed.', duration:'60 min',
-      fields:[{id:'bs_weight',label:'Back squat weight used (kg)'},{id:'bs_rpe',label:'Top set RPE (1-10)'}] },
+      main:[
+        { text:'Back squat: 5×3 @ 140 kg', log:'Weight used (kg)' },
+        { text:'Front squat: 4×2 @ 120 kg', log:'Weight used (kg)' },
+        { text:'Box squat: 3×5 @ 100 kg — full stop method', log:'Top set RPE (1-10)' },
+      ],
+      load:'Heavy but not maximal. All sets completed.', duration:'60 min' },
     { day:'Thu', tag:'wod', tagLabel:'WOD', title:'For time chipper', sub:'15-20 min target',
       why:'Longer WOD to test aerobic engine under real CrossFit conditions.',
       warmup:'10 min.',
-      main:['For time:','800m run','30 wall balls (9 kg)','20 T2B','15 power snatches @ 70 kg','20 T2B','30 wall balls','800m run'],
-      load:'85% effort. Do not blow up on the first 800m.', duration:'40 min',
-      fields:[{id:'wod_time',label:'Total time (mm:ss)'},{id:'run_split',label:'First 800m split (mm:ss)'}] },
+      main:[
+        { text:'For time:' },
+        { text:'800m run', log:'Split (mm:ss)' },
+        { text:'30 wall balls (9 kg)' },
+        { text:'20 T2B' },
+        { text:'15 power snatches @ 70 kg', log:'Unbroken? (y/n)' },
+        { text:'20 T2B' },
+        { text:'30 wall balls' },
+        { text:'800m run', log:'Total time (mm:ss)' },
+      ],
+      load:'85% effort. Do not blow up on the first 800m.', duration:'40 min' },
     { day:'Fri', tag:'skill', tagLabel:'Skill', title:'Snatch build', sub:'Up to 85% 1RM',
       why:'Third week — introducing heavier snatch singles.',
       warmup:'10 min, overhead mobility.',
-      main:['Snatch: work up to 90 kg in singles','Every rep: pause 2 sec in hole before standing','Drop to 75 kg for 3×2 touch-and-go if singles felt solid','Overhead squat: 3×3 @ 80 kg'],
-      load:"Don't chase a PR. Lockout quality is the priority.", duration:'60 min',
-      fields:[{id:'snatch_top',label:'Heaviest snatch completed (kg)'},{id:'snatch_feel',label:'Lockout quality (1-10)'}] },
+      main:[
+        { text:'Snatch: work up to 90 kg in singles', log:'Heaviest completed (kg)' },
+        { text:'Every rep: pause 2 sec in hole before standing' },
+        { text:'Drop to 75 kg for 3×2 touch-and-go if singles felt solid', log:'Lockout quality (1-10)' },
+        { text:'Overhead squat: 3×3 @ 80 kg', log:'Weight used (kg)' },
+      ],
+      load:"Don't chase a PR. Lockout quality is the priority.", duration:'60 min' },
     { day:'Sat', tag:'zone2', tagLabel:'Zone 2', title:'Long run', sub:'50 min @ 70% HR',
       why:'Progressive overload — 50 minutes this week.',
       warmup:'5 min walk.',
-      main:['50 min easy run at 70% max HR','You should notice slight improvement in pace vs week 1','Track your average pace — this is data'],
-      load:'HR under 145 throughout.', duration:'55 min',
-      fields:[{id:'run_pace',label:'Avg pace (min/km)'},{id:'run_avg_hr',label:'Avg HR (bpm)'}] }
+      main:[
+        { text:'50 min easy run at 70% max HR', log:'Avg pace (min/km)' },
+        { text:'You should notice slight improvement in pace vs week 1', log:'Avg HR (bpm)' },
+        { text:'Track your average pace — this is data' },
+      ],
+      load:'HR under 145 throughout.', duration:'55 min' }
   ],
   w4: [
     { day:'Mon', tag:'skill', tagLabel:'Skill', title:'HSPU — max test', sub:'Record strict max',
       why:'End of month 1. Test strict HSPU max vs baseline of 8 reps.',
       warmup:'12 min, thorough shoulder prep.',
-      main:['Rest 10 min after warmup','MAX strict HSPU — record the number','Rest 5 min','Second max attempt — record','3×10 DB Z-press @ working weight'],
-      load:'Max effort on test sets only. Nothing else overhead.', duration:'45 min',
-      fields:[{id:'hspu_max1',label:'Max attempt 1 (reps)'},{id:'hspu_max2',label:'Max attempt 2 (reps)'}] },
+      main:[
+        { text:'Rest 10 min after warmup' },
+        { text:'MAX strict HSPU — first attempt', log:'Reps (attempt 1)' },
+        { text:'Rest 5 min' },
+        { text:'Second max attempt', log:'Reps (attempt 2)' },
+        { text:'3×10 DB Z-press @ working weight', log:'Weight used (kg)' },
+      ],
+      load:'Max effort on test sets only. Nothing else overhead.', duration:'45 min' },
     { day:'Tue', tag:'zone2', tagLabel:'Zone 2', title:'Easy run', sub:'35 min @ 70% HR',
       why:'Deload on Zone 2 volume before end-of-month benchmarks.',
       warmup:'5 min walk.',
-      main:['35 min easy run at 70% max HR','Shorter than last week — intentional recovery','No strides this week'],
-      load:'Easy. Recovery session.', duration:'40 min',
-      fields:[{id:'run_pace',label:'Avg pace (min/km)'},{id:'run_avg_hr',label:'Avg HR (bpm)'}] },
+      main:[
+        { text:'35 min easy run at 70% max HR', log:'Avg pace (min/km)' },
+        { text:'Shorter than last week — intentional recovery', log:'Avg HR (bpm)' },
+        { text:'No strides this week' },
+      ],
+      load:'Easy. Recovery session.', duration:'40 min' },
     { day:'Wed', tag:'strength', tagLabel:'Strength', title:'Squat — 3RM test', sub:'New 3RM back squat',
       why:'End of month 1 strength test. 3RM is safer than 1RM for tracking.',
       warmup:'15 min, build up progressively.',
-      main:['Work up to a 3RM back squat','Expected target: 155-160 kg for 3','Front squat: 3×3 @ 115 kg after the 3RM'],
-      load:'Max effort on the 3RM. Record the number.', duration:'60 min',
-      fields:[{id:'bs_3rm',label:'3RM achieved (kg)'},{id:'fs_weight',label:'Front squat weight (kg)'}] },
+      main:[
+        { text:'Work up to a 3RM back squat', log:'3RM achieved (kg)' },
+        { text:'Expected target: 155-160 kg for 3' },
+        { text:'Front squat: 3×3 @ 115 kg after the 3RM', log:'Weight used (kg)' },
+      ],
+      load:'Max effort on the 3RM. Record the number.', duration:'60 min' },
     { day:'Thu', tag:'wod', tagLabel:'WOD', title:'3km run test', sub:'Time trial — baseline check',
       why:'Most important test of month 1. Baseline: 12:15. Target: sub-12:00.',
       warmup:'10 min easy jog + 3×100m strides.',
-      main:['3km run time trial — full effort','Pacing: first km at 3:55, negative split if possible','Record time and split each km','Compare to 12:15 baseline'],
-      load:'Max effort. Competition simulation.', duration:'30 min',
-      fields:[{id:'run_3km_time',label:'3km time (mm:ss)'},{id:'run_km_splits',label:'km splits (e.g. 4:00/3:55/3:50)'}] },
+      main:[
+        { text:'3km run time trial — full effort', log:'Total time (mm:ss)' },
+        { text:'Pacing: first km at 3:55, negative split if possible' },
+        { text:'1st km split', log:'Split (mm:ss)' },
+        { text:'2nd km split', log:'Split (mm:ss)' },
+        { text:'3rd km split', log:'Split (mm:ss)' },
+      ],
+      load:'Max effort. Competition simulation.', duration:'30 min' },
     { day:'Fri', tag:'skill', tagLabel:'Skill', title:'C&J — heavy single', sub:'Test C&J progress',
       why:'Testing Clean & Jerk at end of month 1.',
       warmup:'12 min, thorough.',
-      main:['Work up to a heavy single C&J','Target: 130 kg (not a PR attempt — quality heavy single)','Focus: jerk lockout quality under heavy load','If lockout solid at 130, attempt 132.5'],
-      load:'Stop if jerk lockout breaks down.', duration:'55 min',
-      fields:[{id:'cj_top',label:'Heaviest C&J completed (kg)'},{id:'jerk_lockout',label:'Lockout quality (1-10)'}] },
+      main:[
+        { text:'Work up to a heavy single C&J', log:'Heaviest completed (kg)' },
+        { text:'Target: 130 kg — focus: jerk lockout quality under heavy load', log:'Lockout quality (1-10)' },
+        { text:'If lockout solid at 130, attempt 132.5', log:'Attempt 132.5? (y/n)' },
+      ],
+      load:'Stop if jerk lockout breaks down.', duration:'55 min' },
     { day:'Sat', tag:'zone2', tagLabel:'Zone 2', title:'Recovery row', sub:'35 min easy row',
       why:'Active recovery after test week. Light rowing without adding fatigue.',
       warmup:'3 min easy.',
-      main:['35 min easy rowing at 60-65% max HR','This is a recovery session — not Zone 2 training','Focus on technique and breathing'],
-      load:'Very easy. Cut to 25 min if tired.', duration:'38 min',
-      fields:[{id:'row_duration',label:'Actual duration (min)'},{id:'row_feel',label:'How you felt (1-10)'}] }
+      main:[
+        { text:'35 min easy rowing at 60-65% max HR', log:'Actual duration (min)' },
+        { text:'This is a recovery session — not Zone 2 training', log:'How you felt (1-10)' },
+        { text:'Focus on technique and breathing' },
+      ],
+      load:'Very easy. Cut to 25 min if tired.', duration:'38 min' }
   ]
 };
 
@@ -330,45 +449,67 @@ const WEEK_NAMES = { w1:'Week 1', w2:'Week 2', w3:'Week 3', w4:'Week 4' };
 let currentWeek = 'w1';
 
 // Dates — Week 1 starts Monday 29 June 2025
-// Each week: Mon-Sat (6 days), skip Sunday between weeks
-const START_DATE = new Date(2025, 5, 29); // June 29, 2025
+const START_DATE = new Date(2025, 5, 29);
 function getSessionDate(weekIndex, dayIndex) {
   const d = new Date(START_DATE);
   d.setDate(d.getDate() + weekIndex * 7 + dayIndex);
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
+function getSessionDateObj(weekIndex, dayIndex) {
+  const d = new Date(START_DATE);
+  d.setDate(d.getDate() + weekIndex * 7 + dayIndex);
+  return d;
+}
 
-function storageKey(wk, idx, field) { return `t_${wk}_${idx}_${field}`; }
-function getLog(wk, idx) {
-  try {
-    const raw = localStorage.getItem(`log_${wk}_${idx}`);
-    return raw ? JSON.parse(raw) : null;
-  } catch(e) { return null; }
-}
-function saveLog(wk, idx, data) {
-  try { localStorage.setItem(`log_${wk}_${idx}`, JSON.stringify(data)); } catch(e) {}
-}
-function isDone(wk, idx) {
-  try { return localStorage.getItem(`done_${wk}_${idx}`) === '1'; } catch(e) { return false; }
-}
-function setDone(wk, idx, val) {
-  try { localStorage.setItem(`done_${wk}_${idx}`, val ? '1' : '0'); } catch(e) {}
-}
+// ── Storage helpers ───────────────────────────────────────
+function getLog(wk, idx)       { try { return JSON.parse(localStorage.getItem(`log_${wk}_${idx}`) || 'null'); } catch(e) { return null; } }
+function saveLog(wk, idx, d)   { try { localStorage.setItem(`log_${wk}_${idx}`, JSON.stringify(d)); } catch(e) {} }
+function isDone(wk, idx)       { try { return localStorage.getItem(`done_${wk}_${idx}`) === '1'; } catch(e) { return false; } }
+function setDone(wk, idx, v)   { try { localStorage.setItem(`done_${wk}_${idx}`, v ? '1' : '0'); } catch(e) {} }
+function getPhoto(wk, idx)     { try { return localStorage.getItem(`photo_${wk}_${idx}`) || null; } catch(e) { return null; } }
+function savePhoto(wk, idx, v) { try { if(v) localStorage.setItem(`photo_${wk}_${idx}`, v); else localStorage.removeItem(`photo_${wk}_${idx}`); } catch(e) {} }
+function getMainLog(wk, idx, mi) { return localStorage.getItem(`ml_${wk}_${idx}_${mi}`) || ''; }
+function saveMainLog(wk, idx, mi, v) { try { if(v) localStorage.setItem(`ml_${wk}_${idx}_${mi}`, v); else localStorage.removeItem(`ml_${wk}_${idx}_${mi}`); } catch(e) {} }
 
 function getWeekProgress(wk) {
-  const sessions = SESSIONS[wk];
-  const done = sessions.filter((_,i) => isDone(wk,i)).length;
-  return { done, total: sessions.length };
+  const s = SESSIONS[wk];
+  return { done: s.filter((_,i) => isDone(wk,i)).length, total: s.length };
 }
 
+// ── Tomorrow banner ───────────────────────────────────────
+function renderTomorrow() {
+  const el = document.getElementById('tomorrowBanner');
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(0,0,0,0);
+  for (let wi = 0; wi < WEEKS.length; wi++) {
+    const wk = WEEKS[wi];
+    for (let di = 0; di < SESSIONS[wk].length; di++) {
+      const d = getSessionDateObj(wi, di);
+      d.setHours(0,0,0,0);
+      if (d.getTime() === tomorrow.getTime()) {
+        const s = SESSIONS[wk][di];
+        el.innerHTML = `
+          <div class="tomorrow-banner" onclick="openModal('${wk}',${di})">
+            <div class="tomorrow-label">Tomorrow · ${s.day} ${getSessionDate(wi, di)}</div>
+            <div class="tomorrow-title">${s.title}</div>
+            <div class="tomorrow-sub">${s.sub} · ${s.duration}</div>
+          </div>`;
+        return;
+      }
+    }
+  }
+  el.innerHTML = '';
+}
+
+// ── Render tabs ───────────────────────────────────────────
 function renderTabs() {
   const tabs = document.getElementById('weekTabs');
   tabs.innerHTML = '';
   WEEKS.forEach(wk => {
     const t = document.createElement('button');
     t.className = 'week-tab' + (wk === currentWeek ? ' active' : '');
-    const prog = getWeekProgress(wk);
-    t.innerHTML = `${WEEK_NAMES[wk]}<br><span style="font-size:10px;opacity:0.7">${prog.done}/${prog.total}</span>`;
+    const p = getWeekProgress(wk);
+    t.innerHTML = `${WEEK_NAMES[wk]}<br><span style="font-size:10px;opacity:0.7">${p.done}/${p.total}</span>`;
     t.onclick = () => { currentWeek = wk; render(); };
     tabs.appendChild(t);
   });
@@ -381,41 +522,33 @@ function renderProgress() {
   document.getElementById('progPct').textContent = pct + '%';
 }
 
+// ── Render day list ───────────────────────────────────────
 function renderDays() {
   const list = document.getElementById('dayList');
   list.innerHTML = '';
-  const sessions = SESSIONS[currentWeek];
-
   const weekIndex = WEEKS.indexOf(currentWeek);
-  sessions.forEach((s, idx) => {
+
+  SESSIONS[currentWeek].forEach((s, idx) => {
     const done = isDone(currentWeek, idx);
     const log = getLog(currentWeek, idx);
+    const photo = getPhoto(currentWeek, idx);
+    const hasLog = log || photo || s.main.some((_,mi) => getMainLog(currentWeek, idx, mi));
     const dateStr = getSessionDate(weekIndex, idx);
 
     const card = document.createElement('div');
     card.className = 'day-card' + (done ? ' done' : '');
-    card.id = `card_${currentWeek}_${idx}`;
-
-    // Build fields HTML
-    let fieldsHTML = s.fields.map(f => {
-      const val = log ? (log[f.id] || '') : '';
-      return `<div class="log-field"><label>${f.label}</label><input type="text" id="f_${currentWeek}_${idx}_${f.id}" placeholder="—" value="${val}"></div>`;
-    }).join('');
-
-    const notesVal = log ? (log.notes || '') : '';
-    const hasLog = log && (Object.values(log).some(v => v && v !== ''));
-
     card.innerHTML = `
-      <div class="day-header" onclick="toggleDetail('${currentWeek}',${idx})">
-        <div style="display:flex;flex-direction:column;align-items:center;width:36px;flex-shrink:0;gap:1px">
+      <div class="day-header" onclick="openModal('${currentWeek}',${idx})">
+        <div class="day-name-col">
           <span class="day-name">${s.day}</span>
-          <span style="font-size:10px;color:var(--text3);white-space:nowrap">${dateStr}</span>
+          <span class="day-date">${dateStr}</span>
         </div>
         <div class="day-info">
           <div class="day-title">${s.title}</div>
           <div class="day-sub">${s.sub}</div>
         </div>
         <div class="day-right">
+          ${hasLog ? '<div class="has-log-dot"></div>' : ''}
           <span class="tag tag-${s.tag}">${s.tagLabel}</span>
           <div class="check-circle${done ? ' checked' : ''}" id="chk_${currentWeek}_${idx}" onclick="toggleDone(event,'${currentWeek}',${idx})">
             <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
@@ -423,97 +556,161 @@ function renderDays() {
             </svg>
           </div>
         </div>
-      </div>
-      <div class="day-detail" id="detail_${currentWeek}_${idx}">
-        <div class="detail-section">
-          <div class="detail-label">Why this session</div>
-          <div class="detail-body">${s.why}</div>
-        </div>
-        <div class="detail-section">
-          <div class="detail-label">Warmup</div>
-          <div class="detail-body">${s.warmup}</div>
-        </div>
-        <div class="detail-section">
-          <div class="detail-label">Main work</div>
-          <ul class="detail-list">${s.main.map(m => `<li>${m}</li>`).join('')}</ul>
-        </div>
-        <div class="detail-section">
-          <div class="detail-label">Load</div>
-          <div class="detail-body">${s.load}</div>
-        </div>
-        <div class="log-section">
-          <div class="log-title">Log this session</div>
-          <div class="log-row">${fieldsHTML}</div>
-          <div class="log-field"><label>Notes</label><textarea id="f_${currentWeek}_${idx}_notes" placeholder="How it went, anything to flag...">${notesVal}</textarea></div>
-          <div class="log-actions">
-            <button class="btn-save" onclick="saveSession('${currentWeek}',${idx})">Save</button>
-            <button class="btn-clear" onclick="clearSession('${currentWeek}',${idx})">Clear</button>
-            <span class="saved-badge${hasLog ? ' show' : ''}" id="badge_${currentWeek}_${idx}">✓ Saved</span>
-          </div>
-          <div class="log-display${hasLog ? ' show' : ''}" id="logdisp_${currentWeek}_${idx}">
-            ${hasLog ? buildLogDisplay(s, log) : ''}
-          </div>
-        </div>
       </div>`;
     list.appendChild(card);
   });
 }
 
-function buildLogDisplay(s, log) {
-  if (!log) return '';
-  let html = s.fields.map(f => {
-    const val = log[f.id];
-    if (!val) return '';
-    return `<div class="log-display-row"><span>${f.label}</span><span>${val}</span></div>`;
-  }).join('');
-  if (log.notes) html += `<div class="log-display-notes">"${log.notes}"</div>`;
-  return html;
-}
-
-function toggleDetail(wk, idx) {
-  const el = document.getElementById(`detail_${wk}_${idx}`);
-  el.classList.toggle('open');
-}
-
 function toggleDone(e, wk, idx) {
   e.stopPropagation();
-  const current = isDone(wk, idx);
-  setDone(wk, idx, !current);
+  setDone(wk, idx, !isDone(wk, idx));
   render();
 }
 
-function saveSession(wk, idx) {
+// ── Session Modal ─────────────────────────────────────────
+let modalWk = null, modalIdx = null;
+
+function openModal(wk, idx) {
+  modalWk = wk; modalIdx = idx;
   const s = SESSIONS[wk][idx];
-  const data = {};
-  s.fields.forEach(f => {
-    const el = document.getElementById(`f_${wk}_${idx}_${f.id}`);
-    if (el) data[f.id] = el.value.trim();
-  });
-  const notesEl = document.getElementById(`f_${wk}_${idx}_notes`);
-  if (notesEl) data.notes = notesEl.value.trim();
-  saveLog(wk, idx, data);
+  const weekIndex = WEEKS.indexOf(wk);
+  const dateStr = getSessionDate(weekIndex, idx);
+  const done = isDone(wk, idx);
+  const log = getLog(wk, idx) || {};
+  const photo = getPhoto(wk, idx);
 
-  const badge = document.getElementById(`badge_${wk}_${idx}`);
-  if (badge) badge.classList.add('show');
-  const disp = document.getElementById(`logdisp_${wk}_${idx}`);
-  if (disp) { disp.innerHTML = buildLogDisplay(s, data); disp.classList.add('show'); }
+  // Header
+  document.getElementById('modalHeader').innerHTML = `
+    <div class="modal-header-top">
+      <button class="modal-back" onclick="closeModal()">← Back</button>
+      <span class="modal-day-badge">${s.day} · ${dateStr}</span>
+    </div>
+    <div class="modal-title">${s.title}</div>
+    <div class="modal-sub">${s.sub} · ${s.duration}</div>
+    <div class="modal-meta">
+      <span class="tag tag-${s.tag}">${s.tagLabel}</span>
+    </div>`;
 
-  if (!isDone(wk, idx)) { setDone(wk, idx, true); render(); }
+  // Body
+  const exerciseRows = s.main.map((item, mi) => {
+    const savedVal = getMainLog(wk, idx, mi);
+    const inputHTML = item.log
+      ? `<input class="exercise-log-input" type="text" placeholder="${item.log}" value="${savedVal}"
+           onchange="saveMainLog('${wk}',${idx},${mi},this.value)" />`
+      : '';
+    return `<div class="exercise-row">
+      <div class="exercise-dot"></div>
+      <div class="exercise-text">${item.text}</div>
+      ${inputHTML}
+    </div>`;
+  }).join('');
+
+  const photoHTML = photo
+    ? `<img src="${photo}" /><button class="photo-remove show" onclick="removePhoto()">✕</button>`
+    : '<div class="photo-upload-placeholder"><span style="font-size:22px">📷</span><span>Add photo</span></div>';
+
+  document.getElementById('modalBody').innerHTML = `
+    <div class="modal-section">
+      <div class="modal-section-label">Why this session</div>
+      <div class="modal-text">${s.why}</div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-label">Warmup</div>
+      <div class="modal-text">${s.warmup}</div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-label">Main work</div>
+      <div class="exercise-list">${exerciseRows}</div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-label">Load note</div>
+      <div class="modal-text">${s.load}</div>
+    </div>
+    <div class="photo-section">
+      <div class="modal-section-label">Photo</div>
+      <div class="photo-upload-box" id="photoBox" onclick="triggerPhoto()">${photoHTML}</div>
+    </div>`;
+
+  // Footer
+  const notesVal = log.notes || '';
+  document.getElementById('modalFooter').innerHTML = `
+    <textarea class="modal-notes-input" id="modalNotes" placeholder="Session notes — how it went, anything to flag...">${notesVal}</textarea>
+    <div class="modal-btn-row">
+      <button class="btn-save" onclick="saveModal()">Save session</button>
+      <button class="btn-done${done ? ' is-done' : ''}" id="modalDoneBtn" onclick="toggleModalDone()">
+        ${done ? '✓ Done' : 'Mark done'}
+      </button>
+    </div>
+    <div class="save-confirm" id="saveConfirm"></div>`;
+
+  document.getElementById('modalOverlay').classList.add('open');
+  document.getElementById('sessionModal').classList.add('open');
+  document.getElementById('modalFooter').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 
-function clearSession(wk, idx) {
-  saveLog(wk, idx, null);
-  setDone(wk, idx, false);
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.getElementById('sessionModal').classList.remove('open');
+  document.getElementById('modalFooter').classList.remove('open');
+  document.body.style.overflow = '';
   render();
 }
 
-function render() {
-  renderTabs();
-  renderProgress();
-  renderDays();
+function saveModal() {
+  const notes = document.getElementById('modalNotes')?.value?.trim() || '';
+  saveLog(modalWk, modalIdx, { notes });
+  const c = document.getElementById('saveConfirm');
+  if (c) { c.textContent = '✓ Saved'; setTimeout(() => { if(c) c.textContent=''; }, 2000); }
+  render();
 }
 
-render();
+function toggleModalDone() {
+  const newVal = !isDone(modalWk, modalIdx);
+  setDone(modalWk, modalIdx, newVal);
+  const btn = document.getElementById('modalDoneBtn');
+  if (btn) { btn.textContent = newVal ? '✓ Done' : 'Mark done'; btn.className = 'btn-done' + (newVal ? ' is-done' : ''); }
+  render();
+}
+
+// ── Photo ─────────────────────────────────────────────────
+function triggerPhoto() {
+  document.getElementById('photoInput').click();
+}
+
+function handlePhoto(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    // Compress via canvas
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const max = 800;
+      let w = img.width, h = img.height;
+      if (w > max) { h = h * max / w; w = max; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const compressed = canvas.toDataURL('image/jpeg', 0.7);
+      savePhoto(modalWk, modalIdx, compressed);
+      const box = document.getElementById('photoBox');
+      if (box) {
+        box.innerHTML = `<img src="${compressed}" /><button class="photo-remove show" onclick="removePhoto()">✕</button>`;
+      }
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+function removePhoto() {
+  event.stopPropagation();
+  savePhoto(modalWk, modalIdx, null);
+  const box = document.getElementById('photoBox');
+  if (box) box.innerHTML = '<div class="photo-upload-placeholder"><span style="font-size:22px">📷</span><span>Add photo</span></div>';
+}
 
 // ── PR Panel ──────────────────────────────────────────────
 const PR_FIELDS = ['pr_bs','pr_fs','pr_snatch','pr_cj','pr_dl','pr_hspu','pr_pullup','pr_rmu','pr_3km','pr_5km','pr_400m','pr_fran','pr_grace'];
@@ -531,9 +728,9 @@ function savePRs() {
     const el = document.getElementById(id);
     if (el) localStorage.setItem(id, el.value.trim());
   });
-  const saved = document.getElementById('prSaved');
-  saved.textContent = '✓ Saved!';
-  setTimeout(() => { saved.textContent = ''; }, 2000);
+  const s = document.getElementById('prSaved');
+  s.textContent = '✓ Saved!';
+  setTimeout(() => { s.textContent = ''; }, 2000);
 }
 
 function openPR() {
@@ -548,7 +745,16 @@ function closePR() {
   document.body.style.overflow = '';
 }
 
+// ── Init ──────────────────────────────────────────────────
+function render() {
+  renderTabs();
+  renderProgress();
+  renderDays();
+  renderTomorrow();
+}
+
 loadPRs();
+render();
 </script>
 </body>
 </html>

@@ -260,6 +260,7 @@
       </div>
     </div>
     <div class="header-right">
+      <button class="pr-open-btn" onclick="openExportPanel()">📤 Export</button>
       <button class="pr-open-btn" onclick="openPR()">🏆 PRs</button>
     </div>
   </div>
@@ -318,6 +319,32 @@
 </div>
 
 <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(event)" />
+
+<!-- Export Panel -->
+<div class="pr-overlay" id="exportOverlay" onclick="closeExportPanel()"></div>
+<div class="pr-panel" id="exportPanel" style="padding-top:52px">
+  <button class="pr-close" onclick="closeExportPanel()">✕</button>
+  <div class="pr-panel-title">Export Week</div>
+  <div class="pr-panel-sub" id="exportSub">Export your logged results to share with Claude</div>
+
+  <div style="display:flex;flex-direction:column;gap:8px;margin-top:20px" id="exportMonthWeekPicker">
+    <div class="pr-section-label">Month</div>
+    <div style="display:flex;gap:6px">
+      <button class="month-tab active" id="expMTab_m1" onclick="setExportMonth('m1')" style="flex:1">Month 1</button>
+      <button class="month-tab" id="expMTab_m2" onclick="setExportMonth('m2')" style="flex:1">Month 2</button>
+    </div>
+    <div class="pr-section-label" style="margin-top:14px">Week</div>
+    <div style="display:flex;gap:6px" id="exportWeekBtns"></div>
+  </div>
+
+  <div style="margin-top:20px;background:var(--bg3);border-radius:var(--radius-sm);padding:14px;max-height:320px;overflow-y:auto" id="exportPreview">
+    <div style="font-size:12px;color:var(--text3)">Select month + week to preview</div>
+  </div>
+
+  <button class="pr-save-btn" style="margin-top:16px" onclick="downloadExport()">⬇ Download .txt</button>
+  <button style="width:100%;margin-top:8px;background:transparent;border:0.5px solid var(--border2);color:var(--text2);border-radius:var(--radius-sm);padding:11px;font-size:13px;cursor:pointer;font-family:inherit" onclick="copyExport()">Copy to clipboard</button>
+  <div style="text-align:center;font-size:11px;color:var(--green);margin-top:8px;min-height:14px" id="exportCopyConfirm"></div>
+</div>
 
 <script>
 // ── Month 1 Sessions ──────────────────────────────────────
@@ -1257,6 +1284,155 @@ function removePhoto() {
   savePhoto(modalWk, modalIdx, null, modalMonth);
   const box = document.getElementById('photoBox');
   if (box) box.innerHTML = '<div class="photo-upload-placeholder"><span style="font-size:22px">📷</span><span>Add photo</span></div>';
+}
+
+// ── Export ────────────────────────────────────────────────
+let exportMonth = 'm1';
+let exportWeek = 'w1';
+
+function openExportPanel() {
+  exportMonth = currentMonth;
+  exportWeek = currentWeek;
+  document.getElementById('exportPanel').classList.add('open');
+  document.getElementById('exportOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  renderExportWeekBtns();
+  renderExportPreview();
+}
+function closeExportPanel() {
+  document.getElementById('exportPanel').classList.remove('open');
+  document.getElementById('exportOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function setExportMonth(m) {
+  exportMonth = m;
+  exportWeek = 'w1';
+  document.getElementById('expMTab_m1').className = 'month-tab'+(m==='m1'?' active':'');
+  document.getElementById('expMTab_m2').className = 'month-tab'+(m==='m2'?' active':'');
+  renderExportWeekBtns();
+  renderExportPreview();
+}
+function renderExportWeekBtns() {
+  const wrap = document.getElementById('exportWeekBtns');
+  wrap.innerHTML = '';
+  WEEKS.forEach(wk => {
+    const b = document.createElement('button');
+    b.className = 'week-tab'+(wk===exportWeek?' active':'');
+    b.style.flex = '1';
+    const p = getExportWeekProgress(wk);
+    b.innerHTML = `${WEEK_NAMES[wk]}<br><span style="font-size:10px;opacity:0.7">${p.done}/${p.total} done</span>`;
+    b.onclick = () => { exportWeek=wk; renderExportWeekBtns(); renderExportPreview(); };
+    wrap.appendChild(b);
+  });
+}
+function getExportWeekProgress(wk) {
+  const sessions = exportMonth==='m1' ? M1_SESSIONS : M2_SESSIONS;
+  const s = sessions[wk];
+  const pfx = exportMonth==='m1' ? '' : 'm2';
+  return { done: s.filter((_,i)=>localStorage.getItem(`${pfx}done_${wk}_${i}`)==='1').length, total: s.length };
+}
+
+function buildExportText() {
+  const sessions = exportMonth==='m1' ? M1_SESSIONS : M2_SESSIONS;
+  const wi = WEEKS.indexOf(exportWeek);
+  const pfx = exportMonth==='m1' ? '' : 'm2';
+  const monthLabel = exportMonth==='m1' ? 'Month 1' : 'Month 2';
+  const weekLabel = WEEK_NAMES[exportWeek];
+
+  let lines = [];
+  lines.push(`=== ${monthLabel} — ${weekLabel} Training Log ===`);
+  lines.push(`Exported: ${new Date().toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'})}`);
+  lines.push('');
+
+  // PRs summary
+  const prLabels = { pr_bs:'Back Squat 1RM', pr_fs:'Front Squat 1RM', pr_snatch:'Snatch 1RM', pr_cj:'Clean & Jerk 1RM', pr_dl:'Deadlift 1RM', pr_hspu:'Strict HSPU max', pr_3km:'3km time', pr_fran:'Fran' };
+  const prValues = Object.entries(prLabels).map(([k,l]) => { const v=localStorage.getItem(k); return v?`  ${l}: ${v}`:null; }).filter(Boolean);
+  if (prValues.length) {
+    lines.push('--- Current PRs ---');
+    lines.push(...prValues);
+    lines.push('');
+  }
+
+  sessions[exportWeek].forEach((s, idx) => {
+    const done = localStorage.getItem(`${pfx}done_${exportWeek}_${idx}`) === '1';
+    const dateStr = getSessionDate(wi, idx, exportMonth);
+    lines.push(`--- ${s.day} ${dateStr} | ${s.title} | ${s.tagLabel} ---`);
+    lines.push(`Status: ${done ? '✓ Completed' : '○ Not completed'}`);
+
+    // Main exercise logs
+    const mainLogs = [];
+    s.main.forEach((item, mi) => {
+      const isObj = typeof item === 'object';
+      if (!isObj || !item.log) return;
+      const val = localStorage.getItem(`${pfx}ml_${exportWeek}_${idx}_${mi}`);
+      if (val) mainLogs.push(`  ${item.log}: ${val}`);
+    });
+    if (mainLogs.length) {
+      lines.push('Logged:');
+      lines.push(...mainLogs);
+    }
+
+    // Fields (Month 2)
+    if (s.fields) {
+      const fieldLogs = [];
+      s.fields.forEach(f => {
+        const val = localStorage.getItem(`${pfx}f_${exportWeek}_${idx}_${f.id}`);
+        if (val) fieldLogs.push(`  ${f.label}: ${val}`);
+      });
+      if (fieldLogs.length) {
+        if (!mainLogs.length) lines.push('Logged:');
+        lines.push(...fieldLogs);
+      }
+    }
+
+    // Notes
+    try {
+      const log = JSON.parse(localStorage.getItem(`${pfx}log_${exportWeek}_${idx}`) || 'null');
+      if (log && log.notes) lines.push(`  Notes: "${log.notes}"`);
+    } catch(e){}
+
+    if (!mainLogs.length && !(s.fields && s.fields.some(f=>localStorage.getItem(`${pfx}f_${exportWeek}_${idx}_${f.id}`)))) {
+      lines.push('  (no data logged)');
+    }
+    lines.push('');
+  });
+
+  lines.push('=== End of export ===');
+  lines.push('');
+  lines.push('Context for next program build:');
+  lines.push(`- Program: ${monthLabel}, ${weekLabel}`);
+  lines.push('- Please use these results to calibrate the next training block.');
+
+  return lines.join('\n');
+}
+
+function renderExportPreview() {
+  const text = buildExportText();
+  const pre = document.getElementById('exportPreview');
+  pre.innerHTML = `<pre style="font-size:11px;color:var(--text2);line-height:1.6;white-space:pre-wrap;font-family:inherit">${text}</pre>`;
+  document.getElementById('exportSub').textContent =
+    `${exportMonth==='m1'?'Month 1':'Month 2'} · ${WEEK_NAMES[exportWeek]}`;
+}
+
+function downloadExport() {
+  const text = buildExportText();
+  const mn = exportMonth==='m1'?'Month1':'Month2';
+  const wk = exportWeek.replace('w','Week');
+  const filename = `training_log_${mn}_${wk}.txt`;
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function copyExport() {
+  const text = buildExportText();
+  navigator.clipboard.writeText(text).then(() => {
+    const c = document.getElementById('exportCopyConfirm');
+    c.textContent = '✓ Copied to clipboard';
+    setTimeout(() => { c.textContent = ''; }, 2500);
+  });
 }
 
 // ── PR Panel ──────────────────────────────────────────────

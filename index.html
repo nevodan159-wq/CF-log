@@ -53,9 +53,30 @@
   .month-tab.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
 
   /* ── Week tabs ── */
-  .week-tabs { display: flex; gap: 5px; }
-  .week-tab { flex: 1; padding: 7px 4px; border-radius: var(--radius-sm); border: 0.5px solid var(--border); background: transparent; color: var(--text2); font-size: 11px; font-weight: 500; cursor: pointer; text-align: center; transition: all 0.15s; line-height: 1.3; }
+  .week-tabs { display: flex; gap: 5px; margin-bottom: 10px; }
+  .week-tab { flex: 1; padding: 6px 4px; border-radius: var(--radius-sm); border: 0.5px solid var(--border); background: transparent; color: var(--text2); font-size: 11px; font-weight: 500; cursor: pointer; text-align: center; transition: all 0.15s; line-height: 1.3; }
   .week-tab.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+  /* ── Day strip ── */
+  .day-strip-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 2px 0 6px; }
+  .day-strip-wrap::-webkit-scrollbar { display: none; }
+  .day-strip { display: flex; gap: 6px; padding: 0 2px; width: max-content; }
+  .day-pill { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 10px; border-radius: 12px; border: 0.5px solid var(--border); background: transparent; cursor: pointer; transition: all 0.15s; min-width: 46px; position: relative; }
+  .day-pill:active { opacity: 0.75; }
+  .day-pill.selected { background: var(--accent); border-color: var(--accent); }
+  .day-pill.is-today:not(.selected) { border-color: rgba(232,255,71,0.5); }
+  .day-pill.is-today:not(.selected) .dp-num { color: var(--accent); }
+  .day-pill.rest-day { opacity: 0.45; cursor: default; }
+  .dp-name { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); }
+  .day-pill.selected .dp-name { color: #0f0f0f; }
+  .dp-num { font-size: 17px; font-weight: 700; color: var(--text); line-height: 1; }
+  .day-pill.selected .dp-num { color: #0f0f0f; }
+  .dp-dot { width: 5px; height: 5px; border-radius: 50%; }
+  .dp-dot.done { background: var(--green); }
+  .day-pill.selected .dp-dot.done { background: rgba(0,0,0,0.4); }
+  .dp-dot.logged { background: var(--orange); }
+  .dp-dot.pending { background: var(--text3); opacity: 0.4; }
+  .dp-dot.hidden { opacity: 0; }
 
   /* ── Progress bar ── */
   .progress-bar { padding: 10px 18px; display: flex; align-items: center; gap: 10px; }
@@ -71,20 +92,21 @@
   .tomorrow-title { font-size: 14px; font-weight: 600; }
   .tomorrow-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
 
-  /* ── Today card (special highlight) ── */
-  .today-section { padding: 10px 16px 0; }
-  .today-label { font-size: 10px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; padding-left: 2px; }
-  .today-card { background: var(--bg2); border-radius: var(--radius); border: 1px solid rgba(232,255,71,0.3); overflow: hidden; cursor: pointer; box-shadow: 0 0 0 0 rgba(232,255,71,0); transition: box-shadow 0.2s; }
-  .today-card:active { opacity: 0.88; }
+  /* ── Selected day session card ── */
+  .selected-session-area { padding: 14px 16px 120px; }
+  .session-card { background: var(--bg2); border-radius: var(--radius); border: 0.5px solid var(--border); overflow: hidden; cursor: pointer; transition: border-color 0.2s; }
+  .session-card.is-done { border-color: rgba(48,209,88,0.25); }
+  .session-card.is-today { border: 1px solid rgba(232,255,71,0.3); }
+  .session-card:active { opacity: 0.85; }
+  .session-card-header { display: flex; align-items: center; gap: 10px; padding: 16px 16px 14px; }
+  .sc-info { flex: 1; min-width: 0; }
+  .sc-label { font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px; }
+  .sc-label.today-lbl { color: var(--accent); }
+  .sc-title { font-size: 18px; font-weight: 700; color: var(--text); line-height: 1.2; }
+  .sc-sub { font-size: 13px; color: var(--text2); margin-top: 3px; }
+  .sc-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
 
-  /* ── Day list ── */
-  .day-list { padding: 10px 16px 120px; display: flex; flex-direction: column; gap: 7px; }
-  .day-card { background: var(--bg2); border-radius: var(--radius); border: 0.5px solid var(--border); overflow: hidden; cursor: pointer; transition: border-color 0.2s; }
-  .day-card.done { border-color: rgba(48,209,88,0.25); }
-  .day-card.today-in-list { border: 1px solid rgba(232,255,71,0.3); }
-  .day-card:active { opacity: 0.85; }
-
-  /* Card header */
+  /* Card header (kept for modal compatibility) */
   .day-header { display: flex; align-items: center; gap: 10px; padding: 13px 14px; }
   .day-name-col { display: flex; flex-direction: column; align-items: center; width: 34px; flex-shrink: 0; gap: 1px; }
   .day-name { font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -232,6 +254,9 @@
     <button class="month-tab" id="mTab_m2" onclick="switchMonth('m2')">Month 2</button>
   </div>
   <div class="week-tabs" id="weekTabs"></div>
+  <div class="day-strip-wrap" id="dayStripWrap">
+    <div class="day-strip" id="dayStrip"></div>
+  </div>
 </div>
 
 <div class="progress-bar">
@@ -241,8 +266,7 @@
 </div>
 
 <div id="tomorrowBanner"></div>
-<div id="todaySection"></div>
-<div class="day-list" id="dayList"></div>
+<div class="selected-session-area" id="selectedSessionArea"></div>
 
 <!-- Session Modal -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
@@ -802,10 +826,25 @@ function getStatus(wk, idx, m) {
   return 'pending';
 }
 
+// ── Selected day state ────────────────────────────────────
+let selectedDayIdx = null; // 0-5 = session index, 6 = Sunday (rest)
+
+function initSelectedDay() {
+  // Auto-select today if in current week, else first session
+  const today = new Date(); today.setHours(0,0,0,0);
+  const wi = WEEKS.indexOf(currentWeek);
+  for (let di = 0; di < 6; di++) {
+    const d = getSessionDateObj(wi, di, currentMonth); d.setHours(0,0,0,0);
+    if (d.getTime() === today.getTime()) { selectedDayIdx = di; return; }
+  }
+  selectedDayIdx = 0;
+}
+
 // ── Month switcher ────────────────────────────────────────
 function switchMonth(m) {
   currentMonth = m;
   currentWeek = 'w1';
+  selectedDayIdx = null;
   document.getElementById('mTab_m1').className = 'month-tab'+(m==='m1'?' active':'');
   document.getElementById('mTab_m2').className = 'month-tab'+(m==='m2'?' active':'');
   document.getElementById('appTitle').innerHTML = `${m==='m1'?'Month 1':'Month 2'} <span>/ Training</span>`;
@@ -837,52 +876,8 @@ function renderTomorrow() {
   el.innerHTML = '';
 }
 
-// ── Today section ─────────────────────────────────────────
-function renderTodaySection() {
-  const el = document.getElementById('todaySection');
-  const t = findTodaySession();
-  if (!t) {
-    // Rest day — show quote
-    const q = QUOTES[new Date().getDay() % QUOTES.length];
-    el.innerHTML = `<div class="rest-card">
-      <div class="rest-icon">🌿</div>
-      <div class="rest-title">Rest day — recover well</div>
-      <div class="rest-quote">"${q.q}"</div>
-      <div class="rest-author">— ${q.a}</div>
-    </div>`;
-    return;
-  }
-  const { mn, wk, wi, di } = t;
-  const s = (mn === 'm1' ? M1_SESSIONS : M2_SESSIONS)[wk][di];
-  const done = isDone(wk,di,mn);
-  const dateStr = getSessionDate(wi,di,mn);
-  const tagColors = { skill:'var(--skill)', strength:'var(--strength)', zone2:'var(--zone2)', wod:'var(--wod)' };
-  const statItems = `
-    <div class="stat-item"><span class="stat-value" style="color:${tagColors[s.tag]}">${s.tagLabel}</span><span class="stat-label">Type</span></div>
-    <div class="stat-item"><span class="stat-value">${s.duration.replace(' min','')}</span><span class="stat-label">Min</span></div>
-    <div class="stat-item"><span class="stat-value">${s.main.length}</span><span class="stat-label">Blocks</span></div>
-    <div class="stat-item"><span class="stat-value" style="color:${done?'var(--green)':'var(--accent)'}">${done?'✓':'→'}</span><span class="stat-label">${done?'Done':'Today'}</span></div>`;
-  el.innerHTML = `<div class="today-section">
-    <div class="today-label">Today · ${s.day} ${dateStr}</div>
-    <div class="today-card" onclick="switchMonth('${mn}');currentWeek='${wk}';render();openModal('${wk}',${di})">
-      <div class="day-header" style="padding:14px 16px">
-        <div class="day-info">
-          <div class="day-title" style="font-size:17px">${s.title}${s.isNew?'<span class="new-badge">NEW</span>':''}</div>
-          <div class="day-sub">${s.sub}</div>
-        </div>
-        <div class="day-right">
-          <span class="tag tag-${s.tag}">${s.tagLabel}</span>
-          <div class="check-circle${done?' checked':''}">
-            <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#0f0f0f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-        </div>
-      </div>
-      <div class="session-stats">${statItems}</div>
-    </div>
-  </div>`;
-}
 
-// ── Render tabs ───────────────────────────────────────────
+// ── Render week tabs ──────────────────────────────────────
 function renderTabs() {
   const tabs = document.getElementById('weekTabs');
   tabs.innerHTML = '';
@@ -891,7 +886,7 @@ function renderTabs() {
     t.className = 'week-tab'+(wk===currentWeek?' active':'');
     const p = getWeekProgress(wk);
     t.innerHTML = `${WEEK_NAMES[wk]}<br><span style="font-size:10px;opacity:0.7">${p.done}/${p.total}</span>`;
-    t.onclick = () => { currentWeek=wk; render(); };
+    t.onclick = () => { currentWeek=wk; selectedDayIdx=null; render(); };
     tabs.appendChild(t);
   });
 }
@@ -903,49 +898,126 @@ function renderProgress() {
   document.getElementById('progPct').textContent = pct+'%';
 }
 
-// ── Render day list ───────────────────────────────────────
-function renderDays() {
-  const list = document.getElementById('dayList');
-  list.innerHTML = '';
-  const weekIndex = WEEKS.indexOf(currentWeek);
+// ── Render day strip ──────────────────────────────────────
+function renderDayStrip() {
+  if (selectedDayIdx === null) initSelectedDay();
+  const strip = document.getElementById('dayStrip');
+  strip.innerHTML = '';
+  const wi = WEEKS.indexOf(currentWeek);
   const today = new Date(); today.setHours(0,0,0,0);
+  const sessions = getSessions()[currentWeek];
+  const DAY_NAMES = ['MON','TUE','WED','THU','FRI','SAT','SUN'];
 
-  getSessions()[currentWeek].forEach((s, idx) => {
-    const status = getStatus(currentWeek, idx);
-    const dateStr = getSessionDate(weekIndex, idx, currentMonth);
-    const sessionDate = getSessionDateObj(weekIndex, idx, currentMonth);
+  for (let di = 0; di < 7; di++) {
+    const isSunday = di === 6;
+    const sessionDate = getSessionDateObj(wi, isSunday ? 5 : di, currentMonth); // use sat date + 1 for sun
+    if (isSunday) sessionDate.setDate(sessionDate.getDate() + 1);
     sessionDate.setHours(0,0,0,0);
+    const dateNum = sessionDate.getDate();
     const isToday = sessionDate.getTime() === today.getTime();
+    const isSelected = selectedDayIdx === di;
+    const hasSession = !isSunday;
+    const status = hasSession ? getStatus(currentWeek, di) : null;
 
-    const card = document.createElement('div');
-    card.className = 'day-card' + (status==='done'?' done':'') + (isToday?' today-in-list':'');
+    const pill = document.createElement('div');
+    let cls = 'day-pill';
+    if (isSelected) cls += ' selected';
+    if (isToday) cls += ' is-today';
+    if (!hasSession) cls += ' rest-day';
+    pill.className = cls;
 
-    // Status dot
-    let dotClass = 'pending';
-    if (isToday) dotClass = 'today-dot';
-    else if (status === 'done') dotClass = 'done';
-    else if (status === 'logged') dotClass = 'logged';
+    let dotCls = 'dp-dot hidden';
+    if (hasSession) {
+      if (status === 'done') dotCls = 'dp-dot done';
+      else if (status === 'logged') dotCls = 'dp-dot logged';
+      else dotCls = 'dp-dot pending';
+    }
 
-    card.innerHTML = `
-      <div class="day-header" onclick="openModal('${currentWeek}',${idx})">
-        <div class="day-name-col">
-          <span class="day-name">${s.day}</span>
-          <span class="day-date">${dateStr}</span>
+    pill.innerHTML = `
+      <span class="dp-name">${DAY_NAMES[di]}</span>
+      <span class="dp-num">${dateNum}</span>
+      <span class="${dotCls}"></span>`;
+
+    if (hasSession) {
+      pill.onclick = () => selectDay(di);
+    }
+    strip.appendChild(pill);
+  }
+
+  // Scroll selected pill into view
+  const pills = strip.querySelectorAll('.day-pill');
+  const sel = pills[selectedDayIdx ?? 0];
+  if (sel) sel.scrollIntoView({ inline: 'center', behavior: 'smooth', block: 'nearest' });
+}
+
+function selectDay(di) {
+  selectedDayIdx = di;
+  renderDayStrip();
+  renderSelectedSession();
+}
+
+// ── Render selected session ───────────────────────────────
+function renderSelectedSession() {
+  const area = document.getElementById('selectedSessionArea');
+  const wi = WEEKS.indexOf(currentWeek);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const sessions = getSessions()[currentWeek];
+
+  // Sunday or no session selected
+  if (selectedDayIdx === 6 || selectedDayIdx === null) {
+    const q = QUOTES[new Date().getDay() % QUOTES.length];
+    area.innerHTML = `<div class="rest-card">
+      <div class="rest-icon">🌿</div>
+      <div class="rest-title">Rest day — recover well</div>
+      <div class="rest-quote">"${q.q}"</div>
+      <div class="rest-author">— ${q.a}</div>
+    </div>`;
+    return;
+  }
+
+  const idx = selectedDayIdx;
+  const s = sessions[idx];
+  const dateStr = getSessionDate(wi, idx, currentMonth);
+  const sessionDate = getSessionDateObj(wi, idx, currentMonth); sessionDate.setHours(0,0,0,0);
+  const isToday = sessionDate.getTime() === today.getTime();
+  const status = getStatus(currentWeek, idx);
+  const done = status === 'done';
+
+  const tagColors = { skill:'var(--skill)', strength:'var(--strength)', zone2:'var(--zone2)', wod:'var(--wod)' };
+  const labelText = isToday ? 'Today' : `${s.day} · ${dateStr}`;
+
+  area.innerHTML = `
+    <div class="session-card ${done?'is-done':''} ${isToday?'is-today':''}" onclick="openModal('${currentWeek}',${idx})">
+      <div class="session-card-header">
+        <div class="sc-info">
+          <div class="sc-label ${isToday?'today-lbl':''}">${labelText}</div>
+          <div class="sc-title">${s.title}${s.isNew?'<span class="new-badge">NEW</span>':''}</div>
+          <div class="sc-sub">${s.sub}</div>
         </div>
-        <div class="day-info">
-          <div class="day-title">${s.title}${s.isNew?'<span class="new-badge">NEW</span>':''}</div>
-          <div class="day-sub">${s.sub}</div>
-        </div>
-        <div class="day-right">
-          <div class="status-dot ${dotClass}"></div>
-          <span class="tag tag-${s.tag}">${s.tagLabel}</span>
-          <div class="check-circle${status==='done'?' checked':''}" onclick="toggleDone(event,'${currentWeek}',${idx})">
+        <div class="sc-right">
+          <div class="check-circle${done?' checked':''}" onclick="toggleDone(event,'${currentWeek}',${idx})">
             <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#0f0f0f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
+          <span class="tag tag-${s.tag}">${s.tagLabel}</span>
         </div>
-      </div>`;
-    list.appendChild(card);
-  });
+      </div>
+      <div class="session-stats">
+        <div class="stat-item"><span class="stat-value">${s.duration.replace(' min','')}</span><span class="stat-label">Min</span></div>
+        <div class="stat-item"><span class="stat-value">${s.main.length}</span><span class="stat-label">Blocks</span></div>
+        <div class="stat-item"><span class="stat-value" style="color:${tagColors[s.tag]}">${s.tagLabel}</span><span class="stat-label">Type</span></div>
+        <div class="stat-item"><span class="stat-value" style="color:${done?'var(--green)':isToday?'var(--accent)':'var(--text3)'}; font-size:18px">${done?'✓':isToday?'→':'—'}</span><span class="stat-label">${done?'Done':isToday?'Today':'Upcoming'}</span></div>
+      </div>
+      <div style="padding:14px 16px; border-top:0.5px solid var(--border)">
+        <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px">Main work</div>
+        ${s.main.slice(0,4).map(item=>{
+          const text = typeof item==='object'?item.text:item;
+          return `<div style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--border);font-size:13px;color:var(--text2)">
+            <span style="color:var(--accent);font-weight:700;flex-shrink:0;margin-top:1px">·</span>${text}
+          </div>`;
+        }).join('')}
+        ${s.main.length > 4 ? `<div style="font-size:12px;color:var(--text3);padding-top:8px">+${s.main.length-4} more — tap to view all</div>` : ''}
+      </div>
+    </div>`;
 }
 
 function toggleDone(e, wk, idx) {
@@ -1152,9 +1224,9 @@ function render() {
   updateStreak();
   renderTabs();
   renderProgress();
-  renderDays();
+  renderDayStrip();
+  renderSelectedSession();
   renderTomorrow();
-  renderTodaySection();
 }
 
 loadPRs();
